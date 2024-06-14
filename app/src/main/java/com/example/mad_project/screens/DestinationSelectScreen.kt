@@ -18,7 +18,16 @@ import androidx.navigation.NavController
 import com.example.ViewModel.DestinationSelectViewModel
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import android.app.DatePickerDialog
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Remove
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
+import org.json.JSONObject
 
 fun showDatePickerDialog(context: Context, onDateSelected: (year: Int, month: Int, day: Int) -> Unit) {
     val calendar = Calendar.getInstance()
@@ -31,6 +40,7 @@ fun showDatePickerDialog(context: Context, onDateSelected: (year: Int, month: In
     }, year, month, day).show()
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(
     navController: NavController,
@@ -41,22 +51,46 @@ fun DestinationSelectScreen(
     var selectedDestination by remember { mutableStateOf("") }
     var date1 by remember { mutableStateOf("") }
     var date2 by remember { mutableStateOf("") }
+    var directFlight by remember { mutableStateOf(false) }
+    var luggageCount by remember { mutableStateOf(0) }
 
-    val (startDate, endDate) = remember(date1, date2) {
-        if (date1.isNotEmpty() && date2.isNotEmpty()) {
-            val format = java.text.SimpleDateFormat("dd.mm.yyyy", java.util.Locale.getDefault())
-            val d1 = format.parse(date1)
-            val d2 = format.parse(date2)
-            if (d1.before(d2)) {
-                date1 to date2
+    val formatter = DateTimeFormatter.ofPattern("d.M.yyyy")
+    val startDate = remember(date1) { if (date1.isNotEmpty()) LocalDate.parse(date1, formatter) else null }
+    val endDate = remember(date2) { if (date2.isNotEmpty()) LocalDate.parse(date2, formatter) else null }
+
+    // Determine the correct start and end dates
+    val (finalStartDate, finalEndDate) = remember(startDate, endDate) {
+        if (startDate != null && endDate != null) {
+            if (startDate.isBefore(endDate)) {
+                startDate to endDate
             } else {
-                date2 to date1
+                endDate to startDate
             }
-        } else if (date1.isNotEmpty()) {
-            date1 to ""
+        } else if (startDate != null) {
+            startDate to null
         } else {
-            "" to ""
+            null to null
         }
+    }
+
+    val tripDuration = remember(finalStartDate, finalEndDate) {
+        if (finalStartDate != null && finalEndDate != null) {
+            ChronoUnit.DAYS.between(finalStartDate, finalEndDate).toString()
+        } else {
+            ""
+        }
+    }
+
+    fun gatherInfoAndNavigate() {
+        val jsonObject = JSONObject().apply {
+            put("destination", selectedDestination)
+            put("startDate", finalStartDate?.format(formatter) ?: "")
+            put("endDate", finalEndDate?.format(formatter) ?: "")
+            put("directFlight", directFlight)
+            put("luggageCount", luggageCount)
+        }
+        val jsonString = jsonObject.toString()
+        navController.navigate("next_screen_route/$jsonString")
     }
 
     Scaffold(
@@ -69,87 +103,140 @@ fun DestinationSelectScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BasicTextField(
-                value = selectedDestination,
-                onValueChange = { selectedDestination = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                decorationBox = { innerTextField ->
-                    Box(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(horizontal = 8.dp, vertical = 12.dp)
-                    ) {
-                        if (selectedDestination.isEmpty()) {
-                            Text("Search for a destination")
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                BasicTextField(
+                    value = selectedDestination,
+                    onValueChange = { selectedDestination = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    decorationBox = { innerTextField ->
+                        Box(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(horizontal = 8.dp, vertical = 12.dp)
+                        ) {
+                            if (selectedDestination.isEmpty()) {
+                                Text("Search for a destination")
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
+                    }
+                )
+
+                if (selectedDestination.isEmpty()) {
+                    viewModel.destinations.forEach { destination ->
+                        Text(
+                            text = destination,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable {
+                                    selectedDestination = destination
+                                }
+                        )
                     }
                 }
-            )
 
-            if (selectedDestination.isEmpty()) {
-                viewModel.destinations.forEach { destination ->
-                    Text(
-                        text = destination,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clickable {
-                                selectedDestination = destination
-                            }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Date picker buttons
+                Button(
+                    onClick = {
+                        showDatePickerDialog(context) { year, month, day ->
+                            date1 = "$day.$month.$year"
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Select Start Date")
+                    Icon(
+                        imageVector = Icons.Filled.DateRange,
+                        contentDescription = "Select Start Date",
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Date picker buttons
-            Button(
-                onClick = {
-                    showDatePickerDialog(context) { year, month, day ->
-                        date1 = "$day.$month.$year"
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Select Start Date")
-                Icon(
-                    imageVector = Icons.Filled.DateRange,
-                    contentDescription = "Select Start Date",
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    showDatePickerDialog(context) { year, month, day ->
-                        date2 = "$day.$month.$year"
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Select End Date")
-                Icon(
-                    imageVector = Icons.Filled.DateRange,
-                    contentDescription = "Select End Date",
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (startDate.isNotEmpty() || endDate.isNotEmpty()) {
-                Text("Start Date: $startDate", modifier = Modifier.padding(vertical = 4.dp))
-                if (endDate.isNotEmpty()) {
-                    Text("End Date: $endDate", modifier = Modifier.padding(vertical = 4.dp))
+                Button(
+                    onClick = {
+                        showDatePickerDialog(context) { year, month, day ->
+                            date2 = "$day.$month.$year"
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Select End Date")
+                    Icon(
+                        imageVector = Icons.Filled.DateRange,
+                        contentDescription = "Select End Date",
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (finalStartDate != null || finalEndDate != null) {
+                    if (finalStartDate != null) {
+                        Text("Start Date: ${finalStartDate.format(formatter)}", modifier = Modifier.padding(vertical = 4.dp))
+                    }
+                    if (finalEndDate != null) {
+                        Text("End Date: ${finalEndDate.format(formatter)}", modifier = Modifier.padding(vertical = 4.dp))
+                    }
+                    if (tripDuration.isNotEmpty()) {
+                        Text("Trip Duration: $tripDuration days", modifier = Modifier.padding(vertical = 4.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Direct Flight Switch and Luggage Counter
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Direct Flight")
+                        Switch(
+                            checked = directFlight,
+                            onCheckedChange = { directFlight = it },
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Luggage:")
+                        IconButton(onClick = { if (luggageCount > 0) luggageCount -= 1 }) {
+                            Icon(imageVector = Icons.Default.Remove, contentDescription = "Remove Luggage")
+                        }
+                        Text(text = luggageCount.toString())
+                        IconButton(onClick = { luggageCount += 1 }) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Luggage")
+                        }
+                    }
+                }
+            }
+
+            // Button to initiate the next step
+            Button(
+                onClick = {
+                    gatherInfoAndNavigate()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text("Check Flights" + Icons.Default.ArrowForward)
             }
         }
     }
