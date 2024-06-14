@@ -24,9 +24,7 @@ fun SightsScreen(
 
     Scaffold (
         topBar = {
-            SimpleTopAppBar("Sights") {
-                //navController.popBackStack()
-            }
+            SimpleTopAppBar("Sights", navController)
         },
         bottomBar = {
             SimpleBottomAppBar(

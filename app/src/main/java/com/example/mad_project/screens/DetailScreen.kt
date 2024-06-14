@@ -44,14 +44,7 @@ fun DetailScreen(featurejson: String,
     val context = LocalContext.current
     Scaffold (
         topBar = {
-            SimpleTopAppBar(title = if((feature.properties?.name?.length?:100)<30) feature.properties?.name?:"Detail" else "Detail") {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Go back"
-                    )
-                }
-            }
+            SimpleTopAppBar(title = if((feature.properties?.name?.length?:100)<30) feature.properties?.name?:"Detail" else "Detail", navController = navController)
         },
         bottomBar = {
             SimpleBottomAppBar(
