@@ -2,8 +2,8 @@ package com.example.ViewModel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.mad_project.Feature
-import com.example.mad_project.FeatureCollection
+import com.example.mad_project.classes.Feature
+import com.example.mad_project.classes.FeatureCollection
 import com.example.mad_project.common.fetchJson
 import com.google.gson.Gson
 

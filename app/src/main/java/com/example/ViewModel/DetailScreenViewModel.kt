@@ -2,11 +2,9 @@ package com.example.ViewModel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.mad_project.Feature
-import com.example.mad_project.common.getallImages
+import com.example.mad_project.classes.Feature
 import com.example.mad_project.fromJson
 import com.google.gson.Gson
-import kotlinx.coroutines.runBlocking
 
 class DetailScreenViewModel : ViewModel() {
     // Define your state here
