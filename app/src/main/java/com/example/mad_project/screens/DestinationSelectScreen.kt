@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,11 +20,6 @@ import androidx.navigation.NavController
 import com.example.ViewModel.DestinationSelectViewModel
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import android.app.DatePickerDialog
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Remove
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -40,7 +37,6 @@ fun showDatePickerDialog(context: Context, onDateSelected: (year: Int, month: In
     }, year, month, day).show()
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(
     navController: NavController,
@@ -48,6 +44,7 @@ fun DestinationSelectScreen(
 ) {
     val context = LocalContext.current
 
+    var startLocation by remember { mutableStateOf("") }
     var selectedDestination by remember { mutableStateOf("") }
     var date1 by remember { mutableStateOf("") }
     var date2 by remember { mutableStateOf("") }
@@ -83,6 +80,7 @@ fun DestinationSelectScreen(
 
     fun gatherInfoAndNavigate() {
         val jsonObject = JSONObject().apply {
+            put("startLocation", startLocation)
             put("destination", selectedDestination)
             put("startDate", finalStartDate?.format(formatter) ?: "")
             put("endDate", finalEndDate?.format(formatter) ?: "")
@@ -110,37 +108,84 @@ fun DestinationSelectScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                BasicTextField(
-                    value = selectedDestination,
-                    onValueChange = { selectedDestination = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(horizontal = 8.dp, vertical = 12.dp)
-                        ) {
-                            if (selectedDestination.isEmpty()) {
-                                Text("Search for a destination")
-                            }
-                            innerTextField()
-                        }
-                    }
-                )
-
-                if (selectedDestination.isEmpty()) {
-                    viewModel.destinations.forEach { destination ->
-                        Text(
-                            text = destination,
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Start Location")
+                        BasicTextField(
+                            value = startLocation,
+                            onValueChange = { startLocation = it },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .clickable {
-                                    selectedDestination = destination
+                                .padding(vertical = 8.dp),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(horizontal = 8.dp, vertical = 12.dp)
+                                ) {
+                                    if (startLocation.isEmpty()) {
+                                        Text("Search for a start location")
+                                    }
+                                    innerTextField()
                                 }
+                            }
                         )
+
+                        if (startLocation.isEmpty()) {
+                            viewModel.destinations.forEach { location ->
+                                Text(
+                                    text = location,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable {
+                                            startLocation = location
+                                        }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Destination")
+                        BasicTextField(
+                            value = selectedDestination,
+                            onValueChange = { selectedDestination = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(horizontal = 8.dp, vertical = 12.dp)
+                                ) {
+                                    if (selectedDestination.isEmpty()) {
+                                        Text("Search for a destination")
+                                    }
+                                    innerTextField()
+                                }
+                            }
+                        )
+
+                        if (selectedDestination.isEmpty()) {
+                            viewModel.destinations.forEach { destination ->
+                                Text(
+                                    text = destination,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable {
+                                            selectedDestination = destination
+                                        }
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -197,7 +242,6 @@ fun DestinationSelectScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Direct Flight Switch and Luggage Counter
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -215,19 +259,17 @@ fun DestinationSelectScreen(
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Luggage:")
+                        Text("Luggage: $luggageCount")
                         IconButton(onClick = { if (luggageCount > 0) luggageCount -= 1 }) {
-                            Icon(imageVector = Icons.Default.Remove, contentDescription = "Remove Luggage")
+                            Icon(imageVector = Icons.Filled.Remove, contentDescription = "Remove Luggage")
                         }
-                        Text(text = luggageCount.toString())
                         IconButton(onClick = { luggageCount += 1 }) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Luggage")
+                            Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Luggage")
                         }
                     }
                 }
             }
 
-            // Button to initiate the next step
             Button(
                 onClick = {
                     gatherInfoAndNavigate()
@@ -236,7 +278,7 @@ fun DestinationSelectScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Check Flights" + Icons.Default.ArrowForward)
+                Text("TBD")
             }
         }
     }
