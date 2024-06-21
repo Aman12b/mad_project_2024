@@ -4,6 +4,7 @@ package com.example.mad_project
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -159,8 +160,8 @@ fun FeatureRow(
 }
 
 @Composable
-fun PlaceDetails(modifier: Modifier, feature: Feature) {
-
+fun PlaceDetails(modifier: Modifier, viewModel: DetailScreenViewModel) {
+    val feature = viewModel.feature.value ?: return
     Column (modifier = modifier.padding(horizontal = 20.dp)) {
         Text(text = "Name: ${feature.properties?.name ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
         Text(text = "Kind: ${feature.properties?.kinds?.replace("_", " ") ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
@@ -188,10 +189,10 @@ fun onItemClickAroow(feature: Feature,context: android.content.Context) {
 
 @Composable
 fun HorizontalScrollableImageView(viewModel: DetailScreenViewModel, modifier: Modifier) {
-
-    val c = viewModel.feature?.properties?.images?.count()
+    Log.i("HorizontalScrollableImageView",viewModel.feature.value?.properties?.images.toString())
+    val c = viewModel.feature.value?.properties?.images?.count()
     LazyRow(modifier = modifier) {
-        items(viewModel.feature?.properties?.images ?: listOf()) { image ->
+        items(viewModel.feature.value?.properties?.images ?: listOf()) { image ->
             Card(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -204,7 +205,7 @@ fun HorizontalScrollableImageView(viewModel: DetailScreenViewModel, modifier: Mo
                         .data(image)
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Movie poster",
+                    contentDescription = "",
                     contentScale = ContentScale.Crop
                 )
             }

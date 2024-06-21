@@ -21,7 +21,7 @@ data class Properties(
     val rate: Int?,
     val wikidata: String?,
     val kinds: String?,
-    val description: String?,
+    var description: String?,
     var images: MutableList<String> = mutableStateListOf(),
 )
 
@@ -30,3 +30,10 @@ data class FeatureCollection(
     val features: List<Feature>
 )
 
+data class ApiResponse(
+    val items: List<Item>
+)
+
+data class Item(
+    val link: String
+)
