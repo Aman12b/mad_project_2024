@@ -50,6 +50,8 @@ android {
 }
 
 dependencies {
+    val lifecycle_version = "2.7.0"
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("com.google.code.gson:gson:2.10.1")
     implementation("io.coil-kt:coil-compose:2.5.0")
@@ -66,7 +68,7 @@ dependencies {
     implementation(libs.androidx.navigation.common.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.volley)
-    implementation(libs.androidx.media3.common)
+    //implementation(libs.androidx.media3.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

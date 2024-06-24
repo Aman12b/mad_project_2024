@@ -1,7 +1,6 @@
 package com.example.mad_project.screens
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,33 +15,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.ViewModel.DestinationSelectViewModel
+import com.example.ViewModel.DestinationSelectViewModelFactory
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import android.app.DatePickerDialog
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import org.json.JSONObject
 
-fun showDatePickerDialog(context: Context, onDateSelected: (year: Int, month: Int, day: Int) -> Unit) {
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    DatePickerDialog(context, { _, selectedYear, selectedMonth, selectedDay ->
-        onDateSelected(selectedYear, selectedMonth + 1, selectedDay)
-    }, year, month, day).show()
-}
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(
-    navController: NavController,
-    viewModel: DestinationSelectViewModel
+    navController: NavController
 ) {
     val context = LocalContext.current
+    val viewModel: DestinationSelectViewModel = viewModel(
+        factory = DestinationSelectViewModelFactory(context)
+    )
 
     var startLocation by remember { mutableStateOf("") }
     var selectedDestination by remember { mutableStateOf("") }
@@ -91,6 +90,8 @@ fun DestinationSelectScreen(
         navController.navigate("next_screen_route/$jsonString")
     }
 
+    var nestedSearch by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             SimpleTopAppBar(title = "Select Destination", navController = navController)
@@ -116,7 +117,10 @@ fun DestinationSelectScreen(
                         Text("Start Location")
                         BasicTextField(
                             value = startLocation,
-                            onValueChange = { startLocation = it },
+                            onValueChange = {
+                                startLocation = it
+                                viewModel.onOriginSearchQueryChange(it)
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
@@ -134,15 +138,29 @@ fun DestinationSelectScreen(
                             }
                         )
 
-                        if (startLocation.isEmpty()) {
-                            viewModel.destinations.forEach { location ->
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                        ) {
+                            val filteredLocations = viewModel.getFilteredLocations(nestedSearch, true)
+
+                            items(filteredLocations) { location ->
                                 Text(
                                     text = location,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp)
                                         .clickable {
-                                            startLocation = location
+                                            if (nestedSearch) {
+                                                when {
+                                                    viewModel.selectedOriginContinent.value == null -> viewModel.selectedOriginContinent.value = location
+                                                    viewModel.selectedOriginCountry.value == null -> viewModel.selectedOriginCountry.value = location
+                                                    else -> startLocation = location
+                                                }
+                                            } else {
+                                                startLocation = location
+                                            }
                                         }
                                 )
                             }
@@ -155,7 +173,10 @@ fun DestinationSelectScreen(
                         Text("Destination")
                         BasicTextField(
                             value = selectedDestination,
-                            onValueChange = { selectedDestination = it },
+                            onValueChange = {
+                                selectedDestination = it
+                                viewModel.onDestinationSearchQueryChange(it)
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
@@ -173,20 +194,50 @@ fun DestinationSelectScreen(
                             }
                         )
 
-                        if (selectedDestination.isEmpty()) {
-                            viewModel.destinations.forEach { destination ->
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                        ) {
+                            val filteredDestinations = viewModel.getFilteredLocations(nestedSearch, false)
+
+                            items(filteredDestinations) { destination ->
                                 Text(
                                     text = destination,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp)
                                         .clickable {
-                                            selectedDestination = destination
+                                            if (nestedSearch) {
+                                                when {
+                                                    viewModel.selectedDestinationContinent.value == null -> viewModel.selectedDestinationContinent.value = destination
+                                                    viewModel.selectedDestinationCountry.value == null -> viewModel.selectedDestinationCountry.value = destination
+                                                    else -> selectedDestination = destination
+                                                }
+                                            } else {
+                                                selectedDestination = destination
+                                            }
                                         }
                                 )
                             }
                         }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Enable Nested Search")
+                    Switch(
+                        checked = nestedSearch,
+                        onCheckedChange = {
+                            nestedSearch = it
+                            viewModel.selectedOriginContinent.value = null
+                            viewModel.selectedOriginCountry.value = null
+                            viewModel.selectedDestinationContinent.value = null
+                            viewModel.selectedDestinationCountry.value = null
+                        }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -228,13 +279,22 @@ fun DestinationSelectScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (finalStartDate != null || finalEndDate != null) {
+                        if (finalStartDate != null) {
+                            Text("Start: ${finalStartDate.format(formatter)}", modifier = Modifier.padding(vertical = 4.dp))
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        if (finalEndDate != null) {
+                            Text("End: ${finalEndDate.format(formatter)}", modifier = Modifier.padding(vertical = 4.dp))
+                        }
+
+                    }
+                }
                 if (finalStartDate != null || finalEndDate != null) {
-                    if (finalStartDate != null) {
-                        Text("Start Date: ${finalStartDate.format(formatter)}", modifier = Modifier.padding(vertical = 4.dp))
-                    }
-                    if (finalEndDate != null) {
-                        Text("End Date: ${finalEndDate.format(formatter)}", modifier = Modifier.padding(vertical = 4.dp))
-                    }
                     if (tripDuration.isNotEmpty()) {
                         Text("Trip Duration: $tripDuration days", modifier = Modifier.padding(vertical = 4.dp))
                     }
@@ -278,8 +338,20 @@ fun DestinationSelectScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("TBD")
+                Text("Confirm and Proceed")
             }
         }
     }
 }
+
+fun showDatePickerDialog(context: Context, onDateSelected: (year: Int, month: Int, day: Int) -> Unit) {
+    val calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    DatePickerDialog(context, { _, selectedYear, selectedMonth, selectedDay ->
+        onDateSelected(selectedYear, selectedMonth + 1, selectedDay)
+    }, year, month, day).show()
+}
+

@@ -2,9 +2,7 @@ package com.example.mad_project.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,7 +26,6 @@ fun Navigation() {
     val navController = rememberNavController()
 
     val homeScreenViewModel: HomeScreenViewModel = viewModel()
-    val destinationSelectViewModel: DestinationSelectViewModel = viewModel()
     val flightsViewModel: FlightsViewModel = viewModel()
 
     val sightsViewModel: SightsViewModel = viewModel()
@@ -51,7 +48,7 @@ fun Navigation() {
         ) {
             DestinationSelectScreen(
                 navController = navController,
-                viewModel = destinationSelectViewModel
+                //viewModel = destinationSelectViewModel
             )
         }
 
