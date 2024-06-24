@@ -1,4 +1,4 @@
-package com.example.mad_project.data_classes
+package com.example.mad_project.classes
 
 data class CountryData(val continents: List<Continent>)
 data class Continent(val name: String, val countries: List<Country>)
