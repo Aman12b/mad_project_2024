@@ -1,4 +1,4 @@
-package com.example.mad_project
+package com.example.mad_project.classes
 
 import androidx.compose.runtime.mutableStateListOf
 
@@ -29,4 +29,3 @@ data class FeatureCollection(
     val type: String?,
     val features: List<Feature>
 )
-

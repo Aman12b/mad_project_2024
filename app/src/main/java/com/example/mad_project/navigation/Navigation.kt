@@ -31,8 +31,9 @@ fun Navigation() {
     val sightsViewModel: SightsViewModel = viewModel()
     val detailScreenViewModel: DetailScreenViewModel = viewModel()
 
+    // for testing purposes changed to FlightsScreen
     NavHost(navController = navController,
-        startDestination = Screen.HomeScreen.route) {
+        startDestination = Screen.FlightsScreen.route) {
 
         composable(
             route = Screen.HomeScreen.route

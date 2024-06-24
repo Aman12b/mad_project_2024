@@ -50,3 +50,28 @@ fun getallImages(obj: String, callback: (List<String>) -> Unit) {
         callback(links)
     }
 }
+
+//----- Flight API -----
+fun flightJson(url: String, processJson: (String) -> Unit) {
+    val request = Request.Builder()
+        .url(url)
+        .build()
+    Log.i("API FETCH", url)
+    val client = OkHttpClient()
+    client.newCall(request).enqueue(object : Callback {
+        override fun onFailure(call: Call, e: IOException) {
+            e.printStackTrace()
+            Log.i("API FETCH ERROR", e.stackTraceToString())
+        }
+
+        override fun onResponse(call: Call, response: Response) {
+            try {
+                val jsonData = response.body?.string()
+                processJson(jsonData ?: "")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.i("Error fetching data", e.toString())
+            }
+        }
+    })
+}
