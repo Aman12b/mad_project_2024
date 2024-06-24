@@ -1,34 +1,56 @@
 package com.example.mad_project.screens
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.ViewModel.FlightsViewModel
-import com.example.mad_project.FeatureList
 import com.example.mad_project.FlightList
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
+import org.json.JSONObject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun FlightsScreen(
     navController: NavController,
-    viewModel: FlightsViewModel
+    viewModel: FlightsViewModel,
+    jsonString: String
 ) {
+    LaunchedEffect(Unit) {
+        val jsonObject = JSONObject(jsonString)
+        val origin = jsonObject.getString("startLocation")
+        val destination = jsonObject.getString("destination")
+        val startDate = jsonObject.getString("startDate")
+        val endDate = jsonObject.getString("endDate")
+
+        viewModel.fetchFlights(origin, destination, startDate, endDate)
+    }
+
     Scaffold(
         topBar = {
             SimpleTopAppBar(title = "Flights", navController = navController)
         }
     ) { innerPadding ->
         Column {
-            FlightList(
-                modifier = Modifier.padding(innerPadding),
-                navController = navController,
-                viewModel = viewModel
-            )
+            if (viewModel.isLoading.value) {
+                // Display a loading indicator here
+                Text("Loading...")
+            } else {
+                // Display the list of flights
+                FlightList(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController,
+                    viewModel = viewModel
+                )
+            }
         }
     }
 }

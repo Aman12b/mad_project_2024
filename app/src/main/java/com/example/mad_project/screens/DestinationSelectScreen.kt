@@ -33,6 +33,7 @@ import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import org.json.JSONObject
 
+//"https://api.travelpayouts.com/v1/prices/direct?origin=VIE&destination&token=8e41eadde108011d6f46c55ceea8a69c"
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(
@@ -50,7 +51,7 @@ fun DestinationSelectScreen(
     var directFlight by remember { mutableStateOf(false) }
     var luggageCount by remember { mutableStateOf(0) }
 
-    val formatter = DateTimeFormatter.ofPattern("d.M.yyyy")
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val startDate = remember(date1) { if (date1.isNotEmpty()) LocalDate.parse(date1, formatter) else null }
     val endDate = remember(date2) { if (date2.isNotEmpty()) LocalDate.parse(date2, formatter) else null }
 
@@ -87,7 +88,7 @@ fun DestinationSelectScreen(
             put("luggageCount", luggageCount)
         }
         val jsonString = jsonObject.toString()
-        navController.navigate("next_screen_route/$jsonString")
+        navController.navigate("flights/$jsonString")
     }
 
     var nestedSearch by remember { mutableStateOf(false) }
@@ -246,7 +247,7 @@ fun DestinationSelectScreen(
                 Button(
                     onClick = {
                         showDatePickerDialog(context) { year, month, day ->
-                            date1 = "$day.$month.$year"
+                            date1 = formatWithZeroPadding(day, month, year)
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -264,7 +265,7 @@ fun DestinationSelectScreen(
                 Button(
                     onClick = {
                         showDatePickerDialog(context) { year, month, day ->
-                            date2 = "$day.$month.$year"
+                            date2 = formatWithZeroPadding(day, month, year)
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -355,3 +356,8 @@ fun showDatePickerDialog(context: Context, onDateSelected: (year: Int, month: In
     }, year, month, day).show()
 }
 
+fun formatWithZeroPadding(day: Int, month: Int, year: Int): String {
+    val dayString = if (day < 10) "0$day" else day.toString()
+    val monthString = if (month < 10) "0$month" else month.toString()
+    return "$dayString.$monthString.$year"
+}

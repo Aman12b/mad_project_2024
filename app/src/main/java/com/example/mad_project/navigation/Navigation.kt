@@ -33,7 +33,7 @@ fun Navigation() {
 
     // for testing purposes changed to FlightsScreen
     NavHost(navController = navController,
-        startDestination = Screen.FlightsScreen.route) {
+        startDestination = Screen.HomeScreen.route) {
 
         composable(
             route = Screen.HomeScreen.route
@@ -54,11 +54,14 @@ fun Navigation() {
         }
 
         composable(
-            route = Screen.FlightsScreen.route
-        ) {
+            route = "${Screen.FlightsScreen.route}/{jsonString}",
+            arguments = listOf(navArgument("jsonString") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val jsonString = backStackEntry.arguments?.getString("jsonString") ?: ""
             FlightsScreen(
                 viewModel = flightsViewModel,
-                navController = navController
+                navController = navController,
+                jsonString = jsonString
             )
         }
 
