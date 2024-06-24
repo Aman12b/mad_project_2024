@@ -31,63 +31,67 @@ import com.example.ViewModel.DetailScreenViewModel
 import com.example.mad_project.Feature
 import com.example.mad_project.HorizontalScrollableImageView
 import com.example.mad_project.PlaceDetails
-import com.example.mad_project.fromJson
 import com.example.mad_project.openGoogleMaps
 import com.example.movieappmad24.components.Bars.SimpleBottomAppBar
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
-import com.google.gson.Gson
 
 @Composable
-fun DetailScreen(featurejson: String,
-                 viewModel: DetailScreenViewModel,
-                 navController: NavController
+fun DetailScreen(
+    featurejson: String,
+    viewModel: DetailScreenViewModel,
+    navController: NavController
 ) {
-
     val isPassFeatureCalled = remember { mutableStateOf(false) }
 
     if (!isPassFeatureCalled.value) {
         viewModel.passFeature(featurejson)
         isPassFeatureCalled.value = true
     }
+
     val isLoading by remember { viewModel.isLoading }
     val feature by remember { viewModel.feature }
     val context = LocalContext.current
-    Scaffold (
+
+    Scaffold(
         topBar = {
-            SimpleTopAppBar(title = if((feature?.properties?.name?.length?:100)<30) feature?.properties?.name?:"Detail" else "Detail") {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Go back"
-                    )
+            SimpleTopAppBar(
+                title = if ((feature?.properties?.name?.length ?: 100) < 30) feature?.properties?.name ?: "Detail" else "Detail",
+                navigationIcons = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Go back"
+                        )
+                    }
                 }
-            }
+            )
         },
         bottomBar = {
             SimpleBottomAppBar(
                 navController = navController
             )
         }
-    ){ innerPadding ->
+    ) { innerPadding ->
         if (isLoading) {
-            Text("Loading...")
+            Text("Loading...", modifier = Modifier.padding(innerPadding))
         } else {
-            Log.i("DetailScreen INFO",viewModel.feature.value?.properties.toString())
             LaunchedEffect(featurejson) {
                 viewModel.loadImages()
                 viewModel.loadWikiInfo()
             }
+
             val commonPadding = Modifier.padding(0.dp)
             val elementSpacing = 8.dp
-            Log.i("DetailScreen",viewModel.feature.value?.properties?.images.toString())
+
             Column(
                 modifier = commonPadding
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .padding(innerPadding)
             ) {
                 HorizontalScrollableImageView(
                     viewModel = viewModel,
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(elementSpacing))
                 Row(
@@ -109,7 +113,7 @@ fun DetailScreen(featurejson: String,
                 Spacer(modifier = Modifier.height(elementSpacing))
                 PlaceDetails(
                     viewModel = viewModel,
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

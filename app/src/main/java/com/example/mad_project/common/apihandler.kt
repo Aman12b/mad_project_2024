@@ -48,7 +48,7 @@ fun getallImages(obj: String, callback: (List<String>) -> Unit): MutableList<Str
                 val item = items.getJSONObject(i)
                 val link = item.getString("link")
                 links.add(link)
-                Log.i("Image URL", link) // Log the image URL
+                Log.i("Image URL", link)
             }
         } else {
             Log.e("getallImages", "No 'items' in the JSON response")
@@ -65,7 +65,6 @@ suspend fun getWikiInfo(placeName: String, callback: (String) -> Unit) {
 
         val limitedCombinations = combinations.take(3)
 
-        // Add original input at the beginning of combinations list
         val combinationsToTry = mutableListOf(placeName)
         combinationsToTry.addAll(limitedCombinations)
 
