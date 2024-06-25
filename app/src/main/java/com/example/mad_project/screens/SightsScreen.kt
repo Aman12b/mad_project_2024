@@ -17,7 +17,8 @@ import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 @Composable
 fun SightsScreen(
     viewModel: SightsViewModel,
-    navController: NavController
+    navController: NavController,
+    jsonString: String
 ) {
     val isLoading by remember { viewModel.isLoading }
     val isSortedAscending by remember { viewModel.isSortedAscending }

@@ -1,6 +1,8 @@
 package com.example.mad_project.screens
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +19,7 @@ import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import com.example.mad_project.classes.FlightInfo
 import org.json.JSONObject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun FlightsScreen(
@@ -43,7 +46,6 @@ fun FlightsScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             if (viewModel.isLoading.value) {
-                // Display a loading indicator here
                 Text("Loading...")
             } else {
                 LazyColumn {
@@ -70,7 +72,7 @@ fun FlightsScreen(
                                     put("flight_number", selectedFlight.flight_number)
                                 })
                             }
-                            navController.navigate("next_screen_route/${updatedJsonObject.toString()}")
+                            navController.navigate("sights/${updatedJsonObject.toString()}")
                         }
                     },
                     modifier = Modifier

@@ -25,11 +25,11 @@ import com.example.mad_project.screens.FlightsScreen
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation() {
-    val context = LocalContext.current
+
     val navController = rememberNavController()
 
     val homeScreenViewModel: HomeScreenViewModel = viewModel()
-    val destinationSelectViewModel: DestinationSelectViewModel = viewModel(factory = DestinationSelectViewModelFactory(context))
+    //val destinationSelectViewModel: DestinationSelectViewModel = viewModel()
     val flightsViewModel: FlightsViewModel = viewModel()
 
     val sightsViewModel: SightsViewModel = viewModel()
@@ -52,8 +52,8 @@ fun Navigation() {
             route = Screen.DestinationSelectScreen.route
         ) {
             DestinationSelectScreen(
-                navController = navController,
-                viewModel = destinationSelectViewModel
+                navController = navController
+                //viewModel = destinationSelectViewModel
             )
         }
 
@@ -70,13 +70,16 @@ fun Navigation() {
         }
 
         composable(
-            route = Screen.SightsScreen.route,
+            route = "${Screen.SightsScreen.route}/{jsonString}",
+            arguments = listOf(navArgument("jsonString") { type = NavType.StringType })
             //arguments = listOf(navArgument(name = DETAIL_ARGUMENT_KEY) {type = NavType.StringType})
         ) { backStackEntry ->
+            val jsonString = backStackEntry.arguments?.getString("jsonString") ?: ""
             SightsScreen(
                 viewModel = sightsViewModel,
                 //location = backStackEntry.arguments?.getString(DETAIL_ARGUMENT_KEY),
-                navController = navController
+                navController = navController,
+                jsonString = jsonString
             )
         }
 

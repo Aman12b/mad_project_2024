@@ -38,12 +38,12 @@ import org.json.JSONObject
 @Composable
 fun DestinationSelectScreen(
     navController: NavController,
-    viewModel: DestinationSelectViewModel
+
 ) {
     val context = LocalContext.current
-    //val viewModel: DestinationSelectViewModel = viewModel(
-    //    factory = DestinationSelectViewModelFactory(context)
-    //)
+    val viewModel: DestinationSelectViewModel = viewModel(
+        factory = DestinationSelectViewModelFactory(context)
+    )
 
     var startLocation by remember { mutableStateOf("") }
     var selectedDestination by remember { mutableStateOf("") }
