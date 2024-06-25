@@ -37,7 +37,7 @@ fun Navigation() {
 
     // for testing purposes changed to FlightsScreen
     NavHost(navController = navController,
-        startDestination = Screen.SightsScreen.route) {
+        startDestination = Screen.HomeScreen.route) {
 
         composable(
             route = Screen.HomeScreen.route
