@@ -223,7 +223,7 @@ fun FlightList(
     LazyColumn(modifier = modifier) {
         items(flights.size) { index ->
             val flight = flights[index]
-            Text(text = "${flight.airline} - ${flight.departure_at} - ${flight.price}")
+            Text(text = "${flight.airline} - ${flight.departureAt} - ${flight.price}")
         }
     }
 }
