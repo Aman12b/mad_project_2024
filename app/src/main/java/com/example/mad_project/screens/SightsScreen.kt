@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -13,13 +14,24 @@ import com.example.ViewModel.SightsViewModel
 import com.example.mad_project.FeatureList
 import com.example.movieappmad24.components.Bars.SimpleBottomAppBar
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
+import org.json.JSONObject
 
 @Composable
 fun SightsScreen(
     viewModel: SightsViewModel,
     navController: NavController,
-    jsonString: String
+    locationJsonString: String
 ) {
+    val jsonObject = JSONObject(locationJsonString)
+    val lat = jsonObject.optDouble("destinationLat")
+    val lng = jsonObject.optDouble("destinationLng")
+
+    LaunchedEffect(Unit) {
+        if (!lat.isNaN() && !lng.isNaN()) {
+            viewModel.fetchSights(lat, lng)
+        }
+    }
+
     val isLoading by remember { viewModel.isLoading }
     val isSortedAscending by remember { viewModel.isSortedAscending }
 

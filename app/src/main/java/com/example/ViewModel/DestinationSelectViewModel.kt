@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mad_project.classes.City
+import com.example.mad_project.classes.Coordinates
 import com.example.mad_project.classes.CountryData
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -124,5 +125,17 @@ class DestinationSelectViewModel(private val context: Context) : ViewModel() {
             selectedDestinationCountry.value = null
             destinationSearchQuery.value = destination
         }
+    }
+
+    fun getCoordinates(cityWithIata: String): Coordinates? {
+        val cityName = cityWithIata.substringBefore(" (")
+        for (countryCities in cities.values) {
+            for (city in countryCities) {
+                if (city.name == cityName) {
+                    return city.coordinates
+                }
+            }
+        }
+        return null
     }
 }

@@ -25,11 +25,9 @@ class FlightsViewModel : ViewModel() {
     fun fetchFlights(origin: String, destination: String, startDate: String, endDate: String) {
         isLoading.value = true
 
-        // Extract IATA code
         val originIata = extractIataCode(origin)
         val destinationIata = extractIataCode(destination)
 
-        // Reformat dates
         val formattedStartDate = reformatDate(startDate)
         val formattedEndDate = reformatDate(endDate)
 

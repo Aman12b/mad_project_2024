@@ -18,14 +18,19 @@ class SightsViewModel : ViewModel() {
     var isSortedAscending = mutableStateOf(true)
         private set
 
-    init {
-        fetchJson("https://api.opentripmap.com/0.1/en/places/radius?radius=5000&lon=36.817223&lat=-1.286389&src_geom=wikidata&apikey=5ae2e3f221c38a28845f05b68f0604b0270b6d5840c560e9934b6302") { jsonData ->
+    fun fetchSights(lat: Double, lng: Double) {
+        isLoading.value = true
+        val apiKey = "5ae2e3f221c38a28845f05b68f0604b0270b6d5840c560e9934b6302"
+        val apiUrl = "https://api.opentripmap.com/0.1/en/places/radius?radius=5000&lon=$lng&lat=$lat&src_geom=wikidata&apikey=$apiKey"
+        fetchJson(apiUrl) { jsonData ->
             val gson = Gson()
             val featureCollection = gson.fromJson(jsonData, FeatureCollection::class.java)
 
+            _features.clear()
             _features.addAll(featureCollection.features)
+
+            isLoading.value = false
         }
-        isLoading.value = false
     }
 
     fun sortByRating() {

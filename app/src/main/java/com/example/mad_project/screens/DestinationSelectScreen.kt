@@ -27,6 +27,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.example.mad_project.navigation.Screen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -37,8 +38,7 @@ import org.json.JSONObject
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(
-    navController: NavController,
-
+    navController: NavController
 ) {
     val context = LocalContext.current
     val viewModel: DestinationSelectViewModel = viewModel(
@@ -80,6 +80,8 @@ fun DestinationSelectScreen(
     }
 
     fun gatherInfoAndNavigate() {
+        val destinationCoordinates = viewModel.getCoordinates(selectedDestination)
+
         val jsonObject = JSONObject().apply {
             put("startLocation", startLocation)
             put("destination", selectedDestination)
@@ -87,9 +89,10 @@ fun DestinationSelectScreen(
             put("endDate", finalEndDate?.format(formatter) ?: "")
             put("directFlight", directFlight)
             put("luggageCount", luggageCount)
+            put("destinationLat", destinationCoordinates?.lat)
+            put("destinationLng", destinationCoordinates?.lng)
         }
-        val jsonString = jsonObject.toString()
-        navController.navigate("flights/$jsonString")
+        navController.navigate(route = Screen.FlightsScreen.withJsonString(jsonObject.toString()))
     }
 
     var nestedSearch by remember { mutableStateOf(false) }
