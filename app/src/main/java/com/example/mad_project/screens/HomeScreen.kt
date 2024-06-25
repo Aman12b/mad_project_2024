@@ -27,7 +27,6 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = {
             navController.navigate(route = Screen.DestinationSelectScreen.route)
-            Log.d("HomeScreen", "Navigating to DestinationSelectScreen")
         }) {
             Text(text = "Start Planning")
         }
