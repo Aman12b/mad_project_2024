@@ -1,17 +1,20 @@
 package com.example.mad_project.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ViewModel.FlightsViewModel
-import com.example.mad_project.FlightList
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
+import com.example.mad_project.classes.FlightInfo
 import org.json.JSONObject
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -36,18 +39,67 @@ fun FlightsScreen(
             SimpleTopAppBar(title = "Flights", navController = navController)
         }
     ) { innerPadding ->
-        Column {
+        Column(
+            modifier = Modifier.padding(innerPadding)
+        ) {
             if (viewModel.isLoading.value) {
                 // Display a loading indicator here
                 Text("Loading...")
             } else {
-                // Display the list of flights
-                FlightList(
-                    modifier = Modifier.padding(innerPadding),
-                    navController = navController,
-                    viewModel = viewModel
-                )
+                LazyColumn {
+                    items(viewModel.flights) { flight ->
+                        FlightCard(
+                            flight = flight,
+                            isSelected = viewModel.highlightedFlight.value == flight,
+                            onClick = { viewModel.highlightFlight(flight) }
+                        )
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        val selectedFlight = viewModel.highlightedFlight.value
+                        if (selectedFlight != null) {
+                            val updatedJsonObject = JSONObject(jsonString).apply {
+                                put("selectedFlight", JSONObject().apply {
+                                    put("airline", selectedFlight.airline)
+                                    put("departure_at", selectedFlight.departure_at)
+                                    put("return_at", selectedFlight.return_at)
+                                    put("expires_at", selectedFlight.expires_at)
+                                    put("price", selectedFlight.price)
+                                    put("flight_number", selectedFlight.flight_number)
+                                })
+                            }
+                            navController.navigate("next_screen_route/${updatedJsonObject.toString()}")
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text("Confirm Flight")
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun FlightCard(flight: FlightInfo, isSelected: Boolean, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick() }
+            .background(if (isSelected) Color.Gray else Color.White),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "Airline: ${flight.airline}")
+            Text(text = "Departure: ${flight.departure_at}")
+            Text(text = "Return: ${flight.return_at}")
+            Text(text = "Price: ${flight.price} €")
+            Text(text = "Flight Number: ${flight.flight_number}")
         }
     }
 }

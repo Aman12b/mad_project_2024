@@ -4,6 +4,8 @@ package com.example.mad_project
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import com.example.mad_project.navigation.Screen
 import com.google.gson.Gson
@@ -47,7 +50,6 @@ import coil.request.ImageRequest
 import com.example.ViewModel.DetailScreenViewModel
 import com.example.ViewModel.FlightsViewModel
 import com.example.ViewModel.SightsViewModel
-import com.example.mad_project.Feature
 
 val gson = Gson()
 
@@ -159,8 +161,8 @@ fun FeatureRow(
 }
 
 @Composable
-fun PlaceDetails(modifier: Modifier, feature: Feature) {
-
+fun PlaceDetails(modifier: Modifier, viewModel: DetailScreenViewModel) {
+    val feature = viewModel.feature.value ?: return
     Column (modifier = modifier.padding(horizontal = 20.dp)) {
         Text(text = "Name: ${feature.properties?.name ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
         Text(text = "Kind: ${feature.properties?.kinds?.replace("_", " ") ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
@@ -169,7 +171,7 @@ fun PlaceDetails(modifier: Modifier, feature: Feature) {
 
         Divider(modifier = Modifier.padding(5.dp))
         Text(text = "Description: ${feature.properties?.description ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
-        }
+    }
 }
 
 fun openGoogleMaps(latitude: Double, longitude: Double, context: Context) {
@@ -178,7 +180,7 @@ fun openGoogleMaps(latitude: Double, longitude: Double, context: Context) {
     context.startActivity(intent)
 }
 
-fun onItemClickAroow(feature: Feature, context: android.content.Context) {
+fun onItemClickAroow(feature: Feature,context: android.content.Context) {
     val url = "https://www.wikidata.org/wiki/${feature.properties?.wikidata}"
     val intent = Intent(Intent.ACTION_VIEW).apply {
         data = Uri.parse(url)
@@ -188,10 +190,10 @@ fun onItemClickAroow(feature: Feature, context: android.content.Context) {
 
 @Composable
 fun HorizontalScrollableImageView(viewModel: DetailScreenViewModel, modifier: Modifier) {
-
-    val c = viewModel.feature?.properties?.images?.count()
+    Log.i("HorizontalScrollableImageView",viewModel.feature.value?.properties?.images.toString())
+    val c = viewModel.feature.value?.properties?.images?.count()
     LazyRow(modifier = modifier) {
-        items(viewModel.feature?.properties?.images ?: listOf()) { image ->
+        items(viewModel.feature.value?.properties?.images ?: listOf()) { image ->
             Card(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -204,14 +206,13 @@ fun HorizontalScrollableImageView(viewModel: DetailScreenViewModel, modifier: Mo
                         .data(image)
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Movie poster",
+                    contentDescription = "",
                     contentScale = ContentScale.Crop
                 )
             }
         }
     }
 }
-
 
 @Composable
 fun FlightList(
@@ -223,7 +224,7 @@ fun FlightList(
     LazyColumn(modifier = modifier) {
         items(flights.size) { index ->
             val flight = flights[index]
-            Text(text = "${flight.airline} - ${flight.departureAt} - ${flight.price}")
+            Text(text = "${flight.airline} - ${flight.departure_at} - ${flight.price}")
         }
     }
 }

@@ -56,7 +56,7 @@ class DetailScreenViewModel : ViewModel() {
     fun loadWikiInfo(){
         runBlocking {
             getWikiInfo(feature.value?.properties?.name.toString()) { wikiInfo ->
-                    feature.value?.properties?.description = wikiInfo
+                feature.value?.properties?.description = wikiInfo
 
                 Log.i("loadWikiInfo", "Feature updated: ${feature.value?.properties?.description.toString()}")
             }

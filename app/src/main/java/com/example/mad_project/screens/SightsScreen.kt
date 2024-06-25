@@ -28,9 +28,7 @@ fun SightsScreen(
                 title = "Sights",
                 onSortClick = { viewModel.sortByRating() },
                 isSortedAscending = isSortedAscending,
-                navigationIcons = {
-                    // Add any navigation icons if needed
-                }
+                navController = navController
             )
         },
         bottomBar = {

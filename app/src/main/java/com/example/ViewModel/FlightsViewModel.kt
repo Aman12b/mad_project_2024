@@ -19,6 +19,7 @@ class FlightsViewModel : ViewModel() {
 
     // Add a loading state
     val isLoading = mutableStateOf(true)
+    val highlightedFlight = mutableStateOf<FlightInfo?>(null)
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun fetchFlights(origin: String, destination: String, startDate: String, endDate: String) {
@@ -32,12 +33,20 @@ class FlightsViewModel : ViewModel() {
         val formattedStartDate = reformatDate(startDate)
         val formattedEndDate = reformatDate(endDate)
 
-        val apiUrl = "https://api.travelpayouts.com/v1/prices/direct?origin=$originIata&destination=$destinationIata&departure_at=$formattedStartDate&return_at=$formattedEndDate&token=YOUR_API_TOKEN"
+        val token = "8e41eadde108011d6f46c55ceea8a69c"
+        val apiUrl = "https://api.travelpayouts.com/v1/prices/" +
+                "cheap?" +
+                "origin=$originIata" +
+                "&destination=$destinationIata" +
+                "&departure_at=$formattedStartDate" +
+                "&return_at=$formattedEndDate" +
+                "&token=$token"
         fetchJson(apiUrl) { jsonData ->
             val gson = Gson()
             val apiResponse = gson.fromJson(jsonData, ApiResponse::class.java)
 
             // Flattening the nested structure
+            _flights.clear()
             apiResponse.data.values.forEach { flightMap ->
                 flightMap.values.forEach { flightInfo ->
                     _flights.add(flightInfo)
@@ -57,5 +66,9 @@ class FlightsViewModel : ViewModel() {
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         val parsedDate = LocalDate.parse(date, formatter)
         return parsedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+    }
+
+    fun highlightFlight(flight: FlightInfo) {
+        highlightedFlight.value = flight
     }
 }

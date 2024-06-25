@@ -3,6 +3,7 @@ package com.example.mad_project.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -10,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ViewModel.DestinationSelectViewModel
+import com.example.ViewModel.DestinationSelectViewModelFactory
 import com.example.ViewModel.DetailScreenViewModel
 import com.example.ViewModel.FlightsViewModel
 import com.example.ViewModel.HomeScreenViewModel
@@ -23,9 +25,11 @@ import com.example.mad_project.screens.FlightsScreen
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation() {
+    val context = LocalContext.current
     val navController = rememberNavController()
 
     val homeScreenViewModel: HomeScreenViewModel = viewModel()
+    val destinationSelectViewModel: DestinationSelectViewModel = viewModel(factory = DestinationSelectViewModelFactory(context))
     val flightsViewModel: FlightsViewModel = viewModel()
 
     val sightsViewModel: SightsViewModel = viewModel()
@@ -33,7 +37,7 @@ fun Navigation() {
 
     // for testing purposes changed to FlightsScreen
     NavHost(navController = navController,
-        startDestination = Screen.HomeScreen.route) {
+        startDestination = Screen.SightsScreen.route) {
 
         composable(
             route = Screen.HomeScreen.route
@@ -49,7 +53,7 @@ fun Navigation() {
         ) {
             DestinationSelectScreen(
                 navController = navController,
-                //viewModel = destinationSelectViewModel
+                viewModel = destinationSelectViewModel
             )
         }
 

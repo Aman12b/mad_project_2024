@@ -1,5 +1,7 @@
 package com.example.mad_project.classes
 
+import androidx.compose.runtime.mutableStateListOf
+
 data class ApiResponse(
     val data: Map<String, Map<String, FlightInfo>>,
     val currency: String,

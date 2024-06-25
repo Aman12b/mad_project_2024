@@ -56,14 +56,7 @@ fun DetailScreen(
         topBar = {
             SimpleTopAppBar(
                 title = if ((feature?.properties?.name?.length ?: 100) < 30) feature?.properties?.name ?: "Detail" else "Detail",
-                navigationIcons = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Go back"
-                        )
-                    }
-                }
+                navController = navController,
             )
         },
         bottomBar = {
