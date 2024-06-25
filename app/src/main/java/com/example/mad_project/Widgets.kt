@@ -47,7 +47,7 @@ import coil.request.ImageRequest
 import com.example.ViewModel.DetailScreenViewModel
 import com.example.ViewModel.FlightsViewModel
 import com.example.ViewModel.SightsViewModel
-import com.example.mad_project.classes.Feature
+import com.example.mad_project.Feature
 
 val gson = Gson()
 

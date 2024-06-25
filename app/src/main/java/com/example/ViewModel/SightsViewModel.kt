@@ -1,4 +1,5 @@
 package com.example.ViewModel
+
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,21 +13,28 @@ class SightsViewModel : ViewModel() {
     val features: List<Feature>
         get() = _features
 
-    // Add a loading state
     val isLoading = mutableStateOf(true)
 
+    var isSortedAscending = mutableStateOf(true)
+        private set
+
     init {
-        fetchJson("https://api.opentripmap.com/0.1/en/places/radius?radius=2000&lon=16.37208&lat=48.20849&src_geom=wikidata&apikey=5ae2e3f221c38a28845f05b68f0604b0270b6d5840c560e9934b6302") { jsonData ->
+        fetchJson("https://api.opentripmap.com/0.1/en/places/radius?radius=5000&lon=36.817223&lat=-1.286389&src_geom=wikidata&apikey=5ae2e3f221c38a28845f05b68f0604b0270b6d5840c560e9934b6302") { jsonData ->
             val gson = Gson()
             val featureCollection = gson.fromJson(jsonData, FeatureCollection::class.java)
-            /*
-            featureCollection.features.forEach { feature ->
-               feature.properties?.images = getallImages(feature.properties?.name.toString())
-            }
-            */
+
             _features.addAll(featureCollection.features)
-            // Set loading to false after data is loaded
-            isLoading.value = false
         }
+        isLoading.value = false
     }
+
+    fun sortByRating() {
+        if (isSortedAscending.value) {
+            _features.sortBy { it.properties?.rate }
+        } else {
+            _features.sortByDescending { it.properties?.rate }
+        }
+        isSortedAscending.value = !isSortedAscending.value
+    }
+
 }

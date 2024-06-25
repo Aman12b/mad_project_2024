@@ -1,6 +1,5 @@
 package com.example.mad_project.screens
 
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -10,8 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.mad_project.FeatureList
 import com.example.ViewModel.SightsViewModel
+import com.example.mad_project.FeatureList
 import com.example.movieappmad24.components.Bars.SimpleBottomAppBar
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 
@@ -21,17 +20,25 @@ fun SightsScreen(
     navController: NavController
 ) {
     val isLoading by remember { viewModel.isLoading }
+    val isSortedAscending by remember { viewModel.isSortedAscending }
 
-    Scaffold (
+    Scaffold(
         topBar = {
-            SimpleTopAppBar("Sights", navController)
+            SimpleTopAppBar(
+                title = "Sights",
+                onSortClick = { viewModel.sortByRating() },
+                isSortedAscending = isSortedAscending,
+                navigationIcons = {
+                    // Add any navigation icons if needed
+                }
+            )
         },
         bottomBar = {
             SimpleBottomAppBar(
                 navController = navController
             )
         }
-    ){ innerPadding ->
+    ) { innerPadding ->
         if (isLoading) {
             Text("Loading...", modifier = Modifier.padding(innerPadding))
         } else {
