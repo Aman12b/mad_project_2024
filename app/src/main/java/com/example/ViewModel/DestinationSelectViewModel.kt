@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mad_project.data_classes.City
-import com.example.mad_project.data_classes.CountryData
+import com.example.mad_project.classes.City
+import com.example.mad_project.classes.CountryData
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
