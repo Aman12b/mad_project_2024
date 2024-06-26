@@ -45,9 +45,7 @@ fun SightsScreen(
             )
         },
         bottomBar = {
-            SimpleBottomAppBar(
-                navController = navController
-            )
+            SimpleBottomAppBar(navController = navController, jsonString = locationJsonString)
         }
     ) { innerPadding ->
         if (isLoading) {

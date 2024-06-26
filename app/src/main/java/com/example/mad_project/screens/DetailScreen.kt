@@ -58,11 +58,6 @@ fun DetailScreen(
                 title = if ((feature?.properties?.name?.length ?: 100) < 30) feature?.properties?.name ?: "Detail" else "Detail",
                 navController = navController,
             )
-        },
-        bottomBar = {
-            SimpleBottomAppBar(
-                navController = navController
-            )
         }
     ) { innerPadding ->
         if (isLoading) {

@@ -42,9 +42,9 @@ fun Navigation() {
 
         composable(
             route = Screen.FlightsScreen.route,
-            arguments = listOf(navArgument(name = JSON_ARGUMENT_KEY) { type = NavType.StringType })
+            arguments = listOf(navArgument(name = DESTINATION_ARGUMENT_KEY) { type = NavType.StringType })
         ) { backStackEntry ->
-            val jsonString = backStackEntry.arguments?.getString(JSON_ARGUMENT_KEY) ?: ""
+            val jsonString = backStackEntry.arguments?.getString(DESTINATION_ARGUMENT_KEY) ?: ""
             FlightsScreen(
                 viewModel = flightsViewModel,
                 navController = navController,
@@ -73,6 +73,16 @@ fun Navigation() {
                 featurejson = backStackEntry.arguments?.getString(DETAIL_ARGUMENT_KEY) ?: "",
                 navController = navController
             )
+        }
+
+        composable(
+            route = Screen.TripsScreen.route,
+            arguments = listOf(navArgument(name = TRIP_ARGUMENT_KEY) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val jsonString = backStackEntry.arguments?.getString(TRIP_ARGUMENT_KEY) ?: ""
+            TripsScreen(
+                navController = navController,
+                jsonString = jsonString)
         }
     }
 }
