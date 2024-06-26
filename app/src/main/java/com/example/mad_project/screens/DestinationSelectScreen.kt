@@ -15,8 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.ViewModel.DestinationSelectViewModel
@@ -34,7 +32,6 @@ import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import org.json.JSONObject
 
-//"https://api.travelpayouts.com/v1/prices/direct?origin=VIE&destination&token=8e41eadde108011d6f46c55ceea8a69c"
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(
@@ -45,12 +42,12 @@ fun DestinationSelectScreen(
         factory = DestinationSelectViewModelFactory(context)
     )
 
-    var startLocation by remember { mutableStateOf("") }
-    var selectedDestination by remember { mutableStateOf("") }
-    var date1 by remember { mutableStateOf("") }
-    var date2 by remember { mutableStateOf("") }
-    var directFlight by remember { mutableStateOf(false) }
-    var luggageCount by remember { mutableStateOf(0) }
+    val startLocation by viewModel.startLocation
+    val selectedDestination by viewModel.selectedDestination
+    val date1 by viewModel.date1
+    val date2 by viewModel.date2
+    val directFlight by viewModel.directFlight
+    val luggageCount by viewModel.luggageCount
 
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val startDate = remember(date1) { if (date1.isNotEmpty()) LocalDate.parse(date1, formatter) else null }
@@ -122,9 +119,9 @@ fun DestinationSelectScreen(
                         Text("Start Location")
                         BasicTextField(
                             value = startLocation,
-                            onValueChange = {
-                                startLocation = it
-                                viewModel.onOriginSearchQueryChange(it)
+                            onValueChange = { newValue ->
+                                viewModel.onOriginSearchQueryChange(newValue)
+                                viewModel.startLocation.value = newValue
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -161,10 +158,10 @@ fun DestinationSelectScreen(
                                                 when {
                                                     viewModel.selectedOriginContinent.value == null -> viewModel.selectedOriginContinent.value = location
                                                     viewModel.selectedOriginCountry.value == null -> viewModel.selectedOriginCountry.value = location
-                                                    else -> startLocation = location
+                                                    else -> viewModel.onSelectDestination(location, true)
                                                 }
                                             } else {
-                                                startLocation = location
+                                                viewModel.onSelectDestination(location, true)
                                             }
                                         }
                                 )
@@ -178,9 +175,9 @@ fun DestinationSelectScreen(
                         Text("Destination")
                         BasicTextField(
                             value = selectedDestination,
-                            onValueChange = {
-                                selectedDestination = it
-                                viewModel.onDestinationSearchQueryChange(it)
+                            onValueChange = { newValue ->
+                                viewModel.onDestinationSearchQueryChange(newValue)
+                                viewModel.selectedDestination.value = newValue
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -217,10 +214,10 @@ fun DestinationSelectScreen(
                                                 when {
                                                     viewModel.selectedDestinationContinent.value == null -> viewModel.selectedDestinationContinent.value = destination
                                                     viewModel.selectedDestinationCountry.value == null -> viewModel.selectedDestinationCountry.value = destination
-                                                    else -> selectedDestination = destination
+                                                    else -> viewModel.onSelectDestination(destination, false)
                                                 }
                                             } else {
-                                                selectedDestination = destination
+                                                viewModel.onSelectDestination(destination, false)
                                             }
                                         }
                                 )
@@ -251,7 +248,7 @@ fun DestinationSelectScreen(
                 Button(
                     onClick = {
                         showDatePickerDialog(context) { year, month, day ->
-                            date1 = formatWithZeroPadding(day, month, year)
+                            viewModel.setStartDate(formatWithZeroPadding(day, month, year))
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -269,7 +266,7 @@ fun DestinationSelectScreen(
                 Button(
                     onClick = {
                         showDatePickerDialog(context) { year, month, day ->
-                            date2 = formatWithZeroPadding(day, month, year)
+                            viewModel.setEndDate(formatWithZeroPadding(day, month, year))
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -318,17 +315,17 @@ fun DestinationSelectScreen(
                         Text("Direct Flight")
                         Switch(
                             checked = directFlight,
-                            onCheckedChange = { directFlight = it },
+                            onCheckedChange = { viewModel.toggleDirectFlight() },
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Luggage: $luggageCount")
-                        IconButton(onClick = { if (luggageCount > 0) luggageCount -= 1 }) {
+                        IconButton(onClick = { viewModel.decreaseLuggageCount() }) {
                             Icon(imageVector = Icons.Filled.Remove, contentDescription = "Remove Luggage")
                         }
-                        IconButton(onClick = { luggageCount += 1 }) {
+                        IconButton(onClick = { viewModel.increaseLuggageCount() }) {
                             Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Luggage")
                         }
                     }

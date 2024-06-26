@@ -3,6 +3,7 @@ package com.example.ViewModel
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mad_project.classes.City
@@ -14,23 +15,31 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.InputStreamReader
 
-class DestinationSelectViewModel(private val context: Context) : ViewModel() {
+class DestinationSelectViewModel(
+    private val context: Context,
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
     val destinations = mutableStateListOf<String>()
     val filteredOriginDestinations = mutableStateListOf<String>()
     val filteredDestinationDestinations = mutableStateListOf<String>()
     val continents = mutableStateListOf<String>()
     val countries = mutableMapOf<String, MutableList<String>>()
     val cities = mutableMapOf<String, MutableList<City>>()
-    val originSearchQuery = mutableStateOf("")
-    val destinationSearchQuery = mutableStateOf("")
-    val selectedDestination = mutableStateOf("")
+    val originSearchQuery = mutableStateOf(savedStateHandle["originSearchQuery"] ?: "")
+    val destinationSearchQuery = mutableStateOf(savedStateHandle["destinationSearchQuery"] ?: "")
+    val selectedDestination = mutableStateOf(savedStateHandle["selectedDestination"] ?: "")
+    val startLocation = mutableStateOf(savedStateHandle["startLocation"] ?: "")
+    val date1 = mutableStateOf(savedStateHandle["date1"] ?: "")
+    val date2 = mutableStateOf(savedStateHandle["date2"] ?: "")
+    val directFlight = mutableStateOf(savedStateHandle["directFlight"] ?: false)
+    val luggageCount = mutableStateOf(savedStateHandle["luggageCount"] ?: 0)
     val isLoading = mutableStateOf(false)
 
-    val selectedOriginContinent = mutableStateOf<String?>(null)
-    val selectedOriginCountry = mutableStateOf<String?>(null)
+    val selectedOriginContinent = mutableStateOf<String?>(savedStateHandle["selectedOriginContinent"])
+    val selectedOriginCountry = mutableStateOf<String?>(savedStateHandle["selectedOriginCountry"])
 
-    val selectedDestinationContinent = mutableStateOf<String?>(null)
-    val selectedDestinationCountry = mutableStateOf<String?>(null)
+    val selectedDestinationContinent = mutableStateOf<String?>(savedStateHandle["selectedDestinationContinent"])
+    val selectedDestinationCountry = mutableStateOf<String?>(savedStateHandle["selectedDestinationCountry"])
 
     init {
         loadDestinations()
@@ -66,11 +75,13 @@ class DestinationSelectViewModel(private val context: Context) : ViewModel() {
 
     fun onOriginSearchQueryChange(query: String) {
         originSearchQuery.value = query
+        savedStateHandle["originSearchQuery"] = query
         filterDestinations(true)
     }
 
     fun onDestinationSearchQueryChange(query: String) {
         destinationSearchQuery.value = query
+        savedStateHandle["destinationSearchQuery"] = query
         filterDestinations(false)
     }
 
@@ -119,11 +130,40 @@ class DestinationSelectViewModel(private val context: Context) : ViewModel() {
         if (isOrigin) {
             selectedOriginContinent.value = null
             selectedOriginCountry.value = null
-            originSearchQuery.value = destination
+            startLocation.value = destination
+            savedStateHandle["startLocation"] = destination
         } else {
             selectedDestinationContinent.value = null
             selectedDestinationCountry.value = null
-            destinationSearchQuery.value = destination
+            selectedDestination.value = destination
+            savedStateHandle["selectedDestination"] = destination
+        }
+    }
+
+    fun setStartDate(date: String) {
+        date1.value = date
+        savedStateHandle["date1"] = date
+    }
+
+    fun setEndDate(date: String) {
+        date2.value = date
+        savedStateHandle["date2"] = date
+    }
+
+    fun toggleDirectFlight() {
+        directFlight.value = !directFlight.value
+        savedStateHandle["directFlight"] = directFlight.value
+    }
+
+    fun increaseLuggageCount() {
+        luggageCount.value += 1
+        savedStateHandle["luggageCount"] = luggageCount.value
+    }
+
+    fun decreaseLuggageCount() {
+        if (luggageCount.value > 0) {
+            luggageCount.value -= 1
+            savedStateHandle["luggageCount"] = luggageCount.value
         }
     }
 
