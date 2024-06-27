@@ -193,5 +193,4 @@ class DestinationSelectViewModel(
     fun getSavedSettingsFiles(): List<String> {
         return context.filesDir.list()?.filter { it.endsWith(".json") }?.map { it.removeSuffix(".json") } ?: emptyList()
     }
-
 }
