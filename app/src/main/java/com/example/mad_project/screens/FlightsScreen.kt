@@ -163,7 +163,7 @@ fun FlightCard(flight: FlightData, isSelected: Boolean, onClick: () -> Unit) {
             Text(text = "Airline: ${flight.airline}")
             Text(text = "Departure: ${flight.departure_at}")
             Text(text = "Return: ${flight.return_at}")
-            Text(text = "Price: ${flight.price}")
+            Text(text = "Price: ${flight.price} €")
             Text(text = "Transfer: ${flight.transfers}")
             Text(text = "Flight Number: ${flight.flight_number}")
         }
