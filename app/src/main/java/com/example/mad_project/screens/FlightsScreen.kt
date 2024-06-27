@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,7 +50,7 @@ fun FlightsScreen(
                 navController = navController,
                 additionalActions = listOf(
                     TopAppBarAction(
-                        icon = Icons.Default.Info,
+                        icon = Icons.Default.List,
                         onClick = { showDialog = showDialog.not() },
                         contentDescription = "Filter"
                     )

@@ -102,7 +102,7 @@ class FlightsViewModel : ViewModel() {
         val airlines = flights.map { it.airline }.distinct()
         val airlineMap = mutableMapOf<String, Boolean>()
         airlines.forEach { airline ->
-            airlineMap[airline] = true // Initially all airlines are selected
+            airlineMap[airline] = true
         }
         filterAirlineList.value = airlineMap
     }
