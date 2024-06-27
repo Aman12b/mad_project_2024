@@ -13,6 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,8 +35,10 @@ import com.example.ViewModel.DetailScreenViewModel
 import com.example.mad_project.Feature
 import com.example.mad_project.HorizontalScrollableImageView
 import com.example.mad_project.PlaceDetails
+import com.example.mad_project.onItemClickAroow
 import com.example.mad_project.openGoogleMaps
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
+import com.example.movieappmad24.components.Bars.TopAppBarAction
 
 @Composable
 fun DetailScreen(
@@ -56,6 +62,24 @@ fun DetailScreen(
             SimpleTopAppBar(
                 title = if ((feature?.properties?.name?.length ?: 100) < 30) feature?.properties?.name ?: "Detail" else "Detail",
                 navController = navController,
+                additionalActions = listOf(
+                    TopAppBarAction(
+                        icon = Icons.Default.Info,
+                        onClick = { feature?.let { onItemClickAroow(it, context) } },
+                        contentDescription = "Save"
+                    ),
+                    TopAppBarAction(
+                        icon = Icons.Default.LocationOn,
+                        onClick = {
+                            openGoogleMaps(
+                                latitude = feature?.geometry?.coordinates?.get(1) ?: 0.0,
+                                longitude = feature?.geometry?.coordinates?.get(0) ?: 0.0,
+                                context = context
+                            )
+                        },
+                        contentDescription = "Load"
+                    )
+                )
             )
         }
     ) { innerPadding ->
@@ -85,17 +109,6 @@ fun DetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Button(
-                        onClick = {
-                            openGoogleMaps(
-                                latitude = feature?.geometry?.coordinates?.get(1) ?: 0.0,
-                                longitude = feature?.geometry?.coordinates?.get(0) ?: 0.0,
-                                context = context
-                            )
-                        }
-                    ) {
-                        Text("Open in Google Maps")
-                    }
                 }
                 Spacer(modifier = Modifier.height(elementSpacing))
                 PlaceDetails(
