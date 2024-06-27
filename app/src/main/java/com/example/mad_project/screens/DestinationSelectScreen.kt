@@ -193,7 +193,10 @@ fun DestinationSelectScreen(
                 text = {
                     Column {
                         savedDataList.forEachIndexed { index, jsonString ->
-                            Text("Entry ${index + 1}",
+                            val jsonObject = JSONObject(jsonString)
+                            Text("${jsonObject.optString("startLocation", "")} " +
+                                    "- ${jsonObject.optString("destination", "")} - " +
+                                    "${jsonObject.optString("startDate", "")}" ,
                                 modifier = Modifier.clickable {
                                     fillViewWithLoadedData(jsonString)
                                     viewModel.onSelectDestination(selectedDestination, false)
