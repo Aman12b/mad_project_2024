@@ -16,8 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ViewModel.FlightsViewModel
+import com.example.mad_project.classes.FlightData
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
-import com.example.mad_project.classes.FlightInfo
 import com.example.mad_project.navigation.Screen
 import org.json.JSONObject
 
@@ -98,7 +98,7 @@ fun FlightsScreen(
 }
 
 @Composable
-fun FlightCard(flight: FlightInfo, isSelected: Boolean, onClick: () -> Unit) {
+fun FlightCard(flight: FlightData, isSelected: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

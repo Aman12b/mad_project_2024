@@ -13,6 +13,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.InputStreamReader
 
 class DestinationSelectViewModel(
@@ -178,4 +179,19 @@ class DestinationSelectViewModel(
         }
         return null
     }
+
+    fun saveSettings(filename: String, json: String) {
+        val file = File(context.filesDir, "$filename.json")
+        file.writeText(json)
+    }
+
+    fun loadSettings(filename: String): String? {
+        val file = File(context.filesDir, "$filename.json")
+        return if (file.exists()) file.readText() else null
+    }
+
+    fun getSavedSettingsFiles(): List<String> {
+        return context.filesDir.list()?.filter { it.endsWith(".json") }?.map { it.removeSuffix(".json") } ?: emptyList()
+    }
+
 }
