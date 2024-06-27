@@ -14,9 +14,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class FlightsViewModel : ViewModel() {
-    private val _flights = mutableStateListOf<FlightData>()
-    val flights: List<FlightData>
-        get() = _flights
+    var flights = mutableStateListOf<FlightData>()
+    var directFlight = mutableStateOf(false)
+    var filterAirlineList = mutableStateOf(mapOf<String, Boolean>())
 
     // Add a loading state
     val isLoading = mutableStateOf(true)
@@ -45,26 +45,28 @@ class FlightsViewModel : ViewModel() {
                 "&token=$token";
         fetchJson(apiUrl) { jsonData, errorMessage ->
             if (errorMessage != null) {
-                isError.value = "error fetching data";
+                isError.value = "Error fetching data"
                 Log.e("API FETCH ERROR", errorMessage)
-                _flights.clear()
+                flights.clear()
                 isLoading.value = false
             } else {
                 val gson = Gson()
                 val apiResponse = gson.fromJson(jsonData, ApiResponse::class.java)
 
                 // Flattening the nested structure
-                _flights.clear()
+                flights.clear()
                 apiResponse.data.values.forEach { flightData ->
-                    _flights.add(flightData)
+                    flights.add(flightData)
                 }
 
-                if (_flights.isEmpty()) {
+                if (flights.isEmpty()) {
                     isError.value = "No flights found"
                     Log.e("API FETCH ERROR", "No flights found")
                 }
 
                 isLoading.value = false
+                updateAvailableAirlines()
+                applyFilter()
             }
         }
     }
@@ -82,5 +84,34 @@ class FlightsViewModel : ViewModel() {
 
     fun highlightFlight(flight: FlightData) {
         highlightedFlight.value = flight
+    }
+
+    fun updateFilterAirlineList(airline: String, isChecked: Boolean) {
+        val updatedList = filterAirlineList.value.toMutableMap()
+        updatedList[airline] = isChecked
+        filterAirlineList.value = updatedList
+        applyFilter()
+    }
+
+    fun toggleDirectFlightFilter(isChecked: Boolean) {
+        directFlight.value = isChecked
+        applyFilter()
+    }
+
+    private fun updateAvailableAirlines() {
+        val airlines = flights.map { it.airline }.distinct()
+        val airlineMap = mutableMapOf<String, Boolean>()
+        airlines.forEach { airline ->
+            airlineMap[airline] = true
+        }
+        filterAirlineList.value = airlineMap
+    }
+
+    private fun applyFilter() {
+        flights.forEach { flight ->
+            flight.hidebydirectfilter = directFlight.value && flight.transfers != 0
+            flight.hidebyairlinefilter = filterAirlineList.value.isNotEmpty() && !filterAirlineList.value[flight.airline]!!
+        }
+        Log.i("Filter", flights.toString())
     }
 }
