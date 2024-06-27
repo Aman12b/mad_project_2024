@@ -39,7 +39,6 @@ import java.util.Calendar
 import org.json.JSONObject
 import java.time.LocalDateTime
 
-//"https://api.travelpayouts.com/v1/prices/direct?origin=VIE&destination&token=8e41eadde108011d6f46c55ceea8a69c"
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(

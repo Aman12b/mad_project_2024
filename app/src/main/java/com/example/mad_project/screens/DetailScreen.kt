@@ -32,7 +32,6 @@ import com.example.mad_project.Feature
 import com.example.mad_project.HorizontalScrollableImageView
 import com.example.mad_project.PlaceDetails
 import com.example.mad_project.openGoogleMaps
-import com.example.movieappmad24.components.Bars.SimpleBottomAppBar
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 
 @Composable

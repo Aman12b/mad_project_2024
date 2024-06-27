@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.ViewModel.SightsViewModel
 import com.example.mad_project.FeatureList
-import com.example.movieappmad24.components.Bars.SimpleBottomAppBar
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import com.example.movieappmad24.components.Bars.TopAppBarAction
 import org.json.JSONObject
@@ -51,11 +50,7 @@ fun SightsScreen(
                     onClick = { /* Handle sorting click */ },
                     contentDescription = "Sort"
                 )
-
             )
-        },
-        bottomBar = {
-            SimpleBottomAppBar(navController = navController, jsonString = locationJsonString)
         }
     ) { innerPadding ->
         if (isLoading) {

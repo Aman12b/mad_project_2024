@@ -2,7 +2,6 @@ package com.example.mad_project.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +19,6 @@ import com.example.ViewModel.FlightsViewModel
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import com.example.mad_project.classes.FlightInfo
 import com.example.mad_project.navigation.Screen
-import com.example.movieappmad24.components.Bars.SimpleBottomAppBar
 import org.json.JSONObject
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -44,9 +42,6 @@ fun FlightsScreen(
     Scaffold(
         topBar = {
             SimpleTopAppBar(title = "Flights", navController = navController)
-        },
-        bottomBar = {
-            SimpleBottomAppBar(navController = navController, jsonString = jsonString)
         }
     ) { innerPadding ->
         Box(

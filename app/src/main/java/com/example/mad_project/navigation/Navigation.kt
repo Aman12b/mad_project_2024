@@ -74,15 +74,5 @@ fun Navigation() {
                 navController = navController
             )
         }
-
-        composable(
-            route = Screen.TripsScreen.route,
-            arguments = listOf(navArgument(name = TRIP_ARGUMENT_KEY) { type = NavType.StringType })
-        ) { backStackEntry ->
-            val jsonString = backStackEntry.arguments?.getString(TRIP_ARGUMENT_KEY) ?: ""
-            TripsScreen(
-                navController = navController,
-                jsonString = jsonString)
-        }
     }
 }
