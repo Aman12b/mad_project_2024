@@ -11,7 +11,9 @@ data class FlightData(
     val expires_at: String,
     val price: Int,
     val flight_number: Int,
-    val transfers: Int
+    val transfers: Int,
+    var hidebyairlinefilter: Boolean = false,
+    var hidebydirectfilter: Boolean = false
 )
 
 data class ApiResponse(

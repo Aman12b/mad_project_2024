@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +21,7 @@ import com.example.ViewModel.FlightsViewModel
 import com.example.mad_project.classes.FlightData
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import com.example.mad_project.navigation.Screen
+import com.example.movieappmad24.components.Bars.TopAppBarAction
 import org.json.JSONObject
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -38,10 +41,20 @@ fun FlightsScreen(
 
         viewModel.fetchFlights(origin, destination, startDate, endDate)
     }
+    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            SimpleTopAppBar(title = "Flights", navController = navController)
+            SimpleTopAppBar(title = "Flights",
+                navController = navController,
+                additionalActions = listOf(
+                    TopAppBarAction(
+                        icon = Icons.Default.Info,
+                        onClick = { showDialog = showDialog.not() },
+                        contentDescription = "Filter"
+                    )
+                )
+            )
         }
     ) { innerPadding ->
         Box(
@@ -50,20 +63,58 @@ fun FlightsScreen(
                 .padding(innerPadding)
         ) {
             if (viewModel.isLoading.value) {
-                // Display a loading indicator here
                 Text("Loading...")
             } else {
+                if (showDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = { Text("Filter") },
+                        text = {
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("Direct Flights")
+                                    Switch(
+                                        checked = viewModel.directFlight.value,
+                                        onCheckedChange = {
+                                            viewModel.toggleDirectFlightFilter(it)
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text("Select Airlines")
+                                viewModel.filterAirlineList.value.forEach { (airline, checked) ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Checkbox(
+                                            checked = checked,
+                                            onCheckedChange = {
+                                                viewModel.updateFilterAirlineList(airline, it)
+                                            }
+                                        )
+                                        Text(airline, style = MaterialTheme.typography.bodyMedium)
+                                    }
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { showDialog = false }) {
+                                Text("Close".uppercase())
+                            }
+                        }
+                    )
+                }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = 56.dp) // Add padding to avoid overlap with the button
                 ) {
                     items(viewModel.flights) { flight ->
-                        FlightCard(
-                            flight = flight,
-                            isSelected = viewModel.highlightedFlight.value == flight,
-                            onClick = { viewModel.highlightFlight(flight) }
-                        )
+                        if (!flight.hidebyairlinefilter && !flight.hidebydirectfilter) {
+                            FlightCard(
+                                flight = flight,
+                                isSelected = viewModel.highlightedFlight.value == flight,
+                                onClick = { viewModel.highlightFlight(flight) }
+                            )
+                        }
                     }
                 }
 
@@ -112,6 +163,7 @@ fun FlightCard(flight: FlightData, isSelected: Boolean, onClick: () -> Unit) {
             Text(text = "Departure: ${flight.departure_at}")
             Text(text = "Return: ${flight.return_at}")
             Text(text = "Price: ${flight.price}")
+            Text(text = "Transfer: ${flight.transfers}")
             Text(text = "Flight Number: ${flight.flight_number}")
         }
     }

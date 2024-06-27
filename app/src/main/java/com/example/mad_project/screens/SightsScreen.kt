@@ -47,7 +47,7 @@ fun SightsScreen(
                 navController = navController,
                 sortingAction = TopAppBarAction(
                     icon = if (isSortedAscending) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    onClick = { /* Handle sorting click */ },
+                    onClick = { viewModel.sortByRating() },
                     contentDescription = "Sort"
                 )
             )
