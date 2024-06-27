@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.ViewModel.DestinationSelectViewModel
@@ -22,16 +24,22 @@ import com.example.ViewModel.DestinationSelectViewModelFactory
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import android.app.DatePickerDialog
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Star
 import com.example.mad_project.navigation.Screen
+import com.example.movieappmad24.components.Bars.TopAppBarAction
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import org.json.JSONObject
+import java.time.LocalDateTime
 
+//"https://api.travelpayouts.com/v1/prices/direct?origin=VIE&destination&token=8e41eadde108011d6f46c55ceea8a69c"
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DestinationSelectScreen(
@@ -42,12 +50,12 @@ fun DestinationSelectScreen(
         factory = DestinationSelectViewModelFactory(context)
     )
 
-    val startLocation by viewModel.startLocation
-    val selectedDestination by viewModel.selectedDestination
-    val date1 by viewModel.date1
-    val date2 by viewModel.date2
-    val directFlight by viewModel.directFlight
-    val luggageCount by viewModel.luggageCount
+    var startLocation by remember { mutableStateOf("") }
+    var selectedDestination by remember { mutableStateOf("") }
+    var date1 by remember { mutableStateOf("") }
+    var date2 by remember { mutableStateOf("") }
+    var directFlight by remember { mutableStateOf(false) }
+    var luggageCount by remember { mutableStateOf(0) }
 
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val startDate = remember(date1) { if (date1.isNotEmpty()) LocalDate.parse(date1, formatter) else null }
@@ -76,29 +84,128 @@ fun DestinationSelectScreen(
         }
     }
 
-    fun gatherInfoAndNavigate() {
-        val destinationCoordinates = viewModel.getCoordinates(selectedDestination)
+    var nestedSearch by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    val savedDataList = remember { mutableStateListOf<String>() }
 
+    fun createJsonOutofParams(): JSONObject {
+        val destinationCoordinates = viewModel.getCoordinates(selectedDestination)
         val jsonObject = JSONObject().apply {
             put("startLocation", startLocation)
             put("destination", selectedDestination)
-            put("startDate", finalStartDate?.format(formatter) ?: "")
-            put("endDate", finalEndDate?.format(formatter) ?: "")
+            put("startDate", if (startDate != null) formatWithZeroPadding(startDate.dayOfMonth,startDate.monthValue,startDate.year) else null)
+            put("endDate", if (endDate != null) formatWithZeroPadding(endDate.dayOfMonth,endDate.monthValue,endDate.year) else null)
             put("directFlight", directFlight)
             put("luggageCount", luggageCount)
             put("destinationLat", destinationCoordinates?.lat)
             put("destinationLng", destinationCoordinates?.lng)
         }
+        return jsonObject;
+    }
+
+    fun fillViewWithLoadedData(jsonString: String){
+        val jsonObject = JSONObject(jsonString)
+        startLocation = jsonObject.optString("startLocation", "")
+        selectedDestination = jsonObject.optString("destination", "")
+        date1 = jsonObject.optString("startDate", "")
+        date2 = jsonObject.optString("endDate", "")
+        directFlight = jsonObject.optBoolean("directFlight", false)
+        luggageCount = jsonObject.optInt("luggageCount", 0)
+    }
+
+    fun saveDataLocal() {
+        val jsonObject = createJsonOutofParams();
+
+        val jsonString = jsonObject.toString()
+
+        // Save to SharedPreferences with a fixed key
+        val sharedPref = context.getSharedPreferences("my_shared_preferences", Context.MODE_PRIVATE)
+        val entryKey = System.currentTimeMillis().toString() // Use timestamp as key
+        with(sharedPref.edit()) {
+            putString(entryKey, jsonString)
+            apply()
+        }
+
+        // Add the new entry to the list for display
+        savedDataList.add(jsonString)
+    }
+
+    fun clearAllData() {
+        val sharedPref = context.getSharedPreferences("my_shared_preferences", Context.MODE_PRIVATE)
+
+        with(sharedPref.edit()) {
+            clear()
+            apply()
+        }
+
+        savedDataList.clear()
+    }
+
+    fun readAllData() {
+        val sharedPref = context.getSharedPreferences("my_shared_preferences", Context.MODE_PRIVATE)
+        val entriesMap = sharedPref.all // Get all entries from SharedPreferences
+        savedDataList.clear() // Clear existing list
+        entriesMap.values.forEach { value ->
+            if (value is String) {
+                savedDataList.add(value) // Add each JSON string to the list
+            }
+        }
+    }
+
+    fun gatherInfoAndNavigate() {
+        val jsonObject = createJsonOutofParams()
         navController.navigate(route = Screen.FlightsScreen.withJsonString(jsonObject.toString()))
     }
 
-    var nestedSearch by remember { mutableStateOf(false) }
-
     Scaffold(
         topBar = {
-            SimpleTopAppBar(title = "Select Destination", navController = navController)
+            SimpleTopAppBar(title = "Select Destination",
+                navController = navController,
+                additionalActions = listOf(
+                    TopAppBarAction(
+                        icon = Icons.Default.Star,
+                        onClick = { saveDataLocal() },
+                        contentDescription = "Save"
+                    ),
+                    TopAppBarAction(
+                        icon = Icons.Default.ExitToApp,
+                        onClick = {
+                            showDialog = showDialog.not()
+                            readAllData() },
+                        contentDescription = "Load"
+                    ))
+            )
         }
     ) { innerPadding ->
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Saved Data") },
+                text = {
+                    Column {
+                        savedDataList.forEachIndexed { index, jsonString ->
+                            Text("Entry ${index + 1}",
+                                modifier = Modifier.clickable {
+                                    Log.i("infodata", jsonString)
+                                    fillViewWithLoadedData(jsonString)
+                                    showDialog = false
+                                })
+                        } // Display entry index
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("Close".uppercase())
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { clearAllData() }) {
+                        Text("Clear All".uppercase())
+                    }
+                }
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -119,9 +226,9 @@ fun DestinationSelectScreen(
                         Text("Start Location")
                         BasicTextField(
                             value = startLocation,
-                            onValueChange = { newValue ->
-                                viewModel.onOriginSearchQueryChange(newValue)
-                                viewModel.startLocation.value = newValue
+                            onValueChange = {
+                                startLocation = it
+                                viewModel.onOriginSearchQueryChange(it)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -158,10 +265,10 @@ fun DestinationSelectScreen(
                                                 when {
                                                     viewModel.selectedOriginContinent.value == null -> viewModel.selectedOriginContinent.value = location
                                                     viewModel.selectedOriginCountry.value == null -> viewModel.selectedOriginCountry.value = location
-                                                    else -> viewModel.onSelectDestination(location, true)
+                                                    else -> startLocation = location
                                                 }
                                             } else {
-                                                viewModel.onSelectDestination(location, true)
+                                                startLocation = location
                                             }
                                         }
                                 )
@@ -175,9 +282,9 @@ fun DestinationSelectScreen(
                         Text("Destination")
                         BasicTextField(
                             value = selectedDestination,
-                            onValueChange = { newValue ->
-                                viewModel.onDestinationSearchQueryChange(newValue)
-                                viewModel.selectedDestination.value = newValue
+                            onValueChange = {
+                                selectedDestination = it
+                                viewModel.onDestinationSearchQueryChange(it)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -214,10 +321,10 @@ fun DestinationSelectScreen(
                                                 when {
                                                     viewModel.selectedDestinationContinent.value == null -> viewModel.selectedDestinationContinent.value = destination
                                                     viewModel.selectedDestinationCountry.value == null -> viewModel.selectedDestinationCountry.value = destination
-                                                    else -> viewModel.onSelectDestination(destination, false)
+                                                    else -> selectedDestination = destination
                                                 }
                                             } else {
-                                                viewModel.onSelectDestination(destination, false)
+                                                selectedDestination = destination
                                             }
                                         }
                                 )
@@ -248,7 +355,7 @@ fun DestinationSelectScreen(
                 Button(
                     onClick = {
                         showDatePickerDialog(context) { year, month, day ->
-                            viewModel.setStartDate(formatWithZeroPadding(day, month, year))
+                            date1 = formatWithZeroPadding(day, month, year)
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -266,7 +373,7 @@ fun DestinationSelectScreen(
                 Button(
                     onClick = {
                         showDatePickerDialog(context) { year, month, day ->
-                            viewModel.setEndDate(formatWithZeroPadding(day, month, year))
+                            date2 = formatWithZeroPadding(day, month, year)
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -315,17 +422,17 @@ fun DestinationSelectScreen(
                         Text("Direct Flight")
                         Switch(
                             checked = directFlight,
-                            onCheckedChange = { viewModel.toggleDirectFlight() },
+                            onCheckedChange = { directFlight = it },
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Luggage: $luggageCount")
-                        IconButton(onClick = { viewModel.decreaseLuggageCount() }) {
+                        IconButton(onClick = { if (luggageCount > 0) luggageCount -= 1 }) {
                             Icon(imageVector = Icons.Filled.Remove, contentDescription = "Remove Luggage")
                         }
-                        IconButton(onClick = { viewModel.increaseLuggageCount() }) {
+                        IconButton(onClick = { luggageCount += 1 }) {
                             Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Luggage")
                         }
                     }

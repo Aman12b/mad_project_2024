@@ -2,6 +2,9 @@ package com.example.mad_project.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +17,7 @@ import com.example.ViewModel.SightsViewModel
 import com.example.mad_project.FeatureList
 import com.example.movieappmad24.components.Bars.SimpleBottomAppBar
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
+import com.example.movieappmad24.components.Bars.TopAppBarAction
 import org.json.JSONObject
 
 @Composable
@@ -35,13 +39,19 @@ fun SightsScreen(
     val isLoading by remember { viewModel.isLoading }
     val isSortedAscending by remember { viewModel.isSortedAscending }
 
+
+
     Scaffold(
         topBar = {
             SimpleTopAppBar(
                 title = "Sights",
-                onSortClick = { viewModel.sortByRating() },
-                isSortedAscending = isSortedAscending,
-                navController = navController
+                navController = navController,
+                sortingAction = TopAppBarAction(
+                    icon = if (isSortedAscending) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    onClick = { /* Handle sorting click */ },
+                    contentDescription = "Sort"
+                )
+
             )
         },
         bottomBar = {

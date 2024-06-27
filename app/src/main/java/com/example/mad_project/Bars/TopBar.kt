@@ -1,9 +1,8 @@
 package com.example.movieappmad24.components.Bars
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -12,14 +11,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimpleTopAppBar(
     title: String,
-    onSortClick: (() -> Unit)? = null,
-    isSortedAscending: Boolean = true,
+    sortingAction: TopAppBarAction? = null,
+    additionalActions: List<TopAppBarAction> = emptyList(),
     navController: NavController
 ) {
     CenterAlignedTopAppBar(
@@ -33,19 +33,36 @@ fun SimpleTopAppBar(
                 onClick = { navController.popBackStack() }
             ) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowBack,
+                    imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back"
                 )
             }
         },
-
         actions = {
-            if (onSortClick != null) {
-                IconButton(onClick = onSortClick) {
-                    val icon = if (isSortedAscending) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
-                    Icon(imageVector = icon, contentDescription = "Sort")
+            Row {
+                sortingAction?.let {
+                    IconButton(onClick = it.onClick) {
+                        Icon(
+                            imageVector = it.icon,
+                            contentDescription = it.contentDescription
+                        )
+                    }
+                }
+                additionalActions.forEach { action ->
+                    IconButton(onClick = action.onClick) {
+                        Icon(
+                            imageVector = action.icon,
+                            contentDescription = action.contentDescription
+                        )
+                    }
                 }
             }
         }
     )
 }
+
+data class TopAppBarAction(
+    val icon: ImageVector,
+    val onClick: () -> Unit,
+    val contentDescription: String
+)
