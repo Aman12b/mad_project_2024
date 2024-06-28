@@ -27,6 +27,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.Color
@@ -159,6 +160,10 @@ fun DestinationSelectScreen(
         navController.navigate(route = Screen.FlightsScreen.withJsonString(jsonObject.toString()))
     }
 
+    val isFormComplete = remember(startLocation, selectedDestination, date1, date2) {
+        startLocation.isNotEmpty() && selectedDestination.isNotEmpty() && date1.isNotEmpty() && date2.isNotEmpty()
+    }
+
     Scaffold(
         topBar = {
             SimpleTopAppBar(title = "Select Destination",
@@ -252,7 +257,7 @@ fun DestinationSelectScreen(
                                         .padding(horizontal = 8.dp, vertical = 12.dp)
                                 ) {
                                     if (startLocation.isEmpty()) {
-                                        Text("Search for a start location", color = textColor.copy(alpha = 0.5f))
+                                        Text("Type here", color = textColor.copy(alpha = 0.5f))
                                     }
                                     innerTextField()
                                 }
@@ -310,7 +315,7 @@ fun DestinationSelectScreen(
                                         .padding(horizontal = 8.dp, vertical = 12.dp)
                                 ) {
                                     if (selectedDestination.isEmpty()) {
-                                        Text("Search for a destination", color = textColor.copy(alpha = 0.5f))
+                                        Text("Type here", color = textColor.copy(alpha = 0.5f))
                                     }
                                     innerTextField()
                                 }
@@ -351,7 +356,8 @@ fun DestinationSelectScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Enable Nested Search")
+                    Text("Geographic Search")
+                    Spacer(modifier = Modifier.width(10.dp))
                     Switch(
                         checked = nestedSearch,
                         onCheckedChange = {
@@ -417,7 +423,6 @@ fun DestinationSelectScreen(
                         if (finalEndDate != null) {
                             Text("End: ${finalEndDate.format(formatter)}", modifier = Modifier.padding(vertical = 4.dp))
                         }
-
                     }
                 }
                 if (finalStartDate != null || finalEndDate != null) {
@@ -425,57 +430,24 @@ fun DestinationSelectScreen(
                         Text("Trip Duration: $tripDuration days", modifier = Modifier.padding(vertical = 4.dp))
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Direct Flight")
-                        Switch(
-                            checked = directFlight,
-                            onCheckedChange = {
-                                directFlight = it
-                                viewModel.toggleDirectFlight()
-                            },
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Luggage: $luggageCount")
-                        IconButton(onClick = {
-                            if (luggageCount > 0) {
-                                luggageCount -= 1
-                                viewModel.decreaseLuggageCount()
-                            }
-                        }) {
-                            Icon(imageVector = Icons.Filled.Remove, contentDescription = "Remove Luggage")
-                        }
-                        IconButton(onClick = {
-                            luggageCount += 1
-                            viewModel.increaseLuggageCount()
-                        }) {
-                            Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Luggage")
-                        }
-                    }
-                }
             }
 
-            Button(
-                onClick = {
-                    gatherInfoAndNavigate()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("Confirm and Proceed")
+            if (isFormComplete) {
+                Button(
+                    onClick = {
+                        gatherInfoAndNavigate()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text("Confirm and Proceed")
+                    Icon(
+                        imageVector = Icons.Filled.ArrowForward,
+                        contentDescription = "Confirm and Proceed",
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
             }
         }
     }
