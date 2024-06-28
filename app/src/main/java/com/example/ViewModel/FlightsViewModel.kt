@@ -45,7 +45,7 @@ class FlightsViewModel : ViewModel() {
                 "&token=$token";
         fetchJson(apiUrl) { jsonData, errorMessage ->
             if (errorMessage != null) {
-                isError.value = "Error fetching data"
+                isError.value = "No flights found"
                 Log.e("API FETCH ERROR", errorMessage)
                 flights.clear()
                 isLoading.value = false

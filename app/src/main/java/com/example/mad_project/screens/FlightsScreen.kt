@@ -43,6 +43,8 @@ fun FlightsScreen(
         viewModel.fetchFlights(origin, destination, startDate, endDate)
     }
     var showDialog by remember { mutableStateOf(false) }
+    var noflightsshowDialog by remember { mutableStateOf(true) }
+    var isError by remember { mutableStateOf(viewModel.isError) }
 
     Scaffold(
         topBar = {
@@ -65,7 +67,25 @@ fun FlightsScreen(
         ) {
             if (viewModel.isLoading.value) {
                 Text("Loading...")
-            } else {
+            } else if(isError.value != "" && noflightsshowDialog) {
+                AlertDialog(
+                    onDismissRequest = { noflightsshowDialog = false },
+                    title = { Text("Info") },
+                    text = {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(isError.value, style = MaterialTheme.typography.bodyMedium)
+
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            noflightsshowDialog = false
+                        navController.popBackStack()}) {
+                            Text("Close".uppercase())
+                        }
+                    }
+                )
+            }
+            else{
                 if (showDialog) {
                     AlertDialog(
                         onDismissRequest = { showDialog = false },
