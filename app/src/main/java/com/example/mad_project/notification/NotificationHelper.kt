@@ -11,7 +11,7 @@ class NotificationHelper(private val context: Context) {
     @SuppressLint("ServiceCast")
     fun createNotification(title: String, message: String) {
         val builder = NotificationCompat.Builder(context, "flight_channel_id")
-            //.setSmallIcon(R.drawable.) // Passe das Symbol an
+            .setSmallIcon(R.drawable.flight) // Passe das Symbol an
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
