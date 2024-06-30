@@ -74,5 +74,16 @@ fun Navigation() {
                 navController = navController
             )
         }
+
+        composable(
+            route = Screen.SummaryScreen.route,
+            arguments = listOf(navArgument("summaryJson") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val summaryJson = backStackEntry.arguments?.getString("summaryJson") ?: ""
+            SummaryScreen(
+                navController = navController,
+                summaryJson = summaryJson
+            )
+        }
     }
 }

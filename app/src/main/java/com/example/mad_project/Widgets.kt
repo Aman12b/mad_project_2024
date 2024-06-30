@@ -1,25 +1,12 @@
 package com.example.mad_project
 
-
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -27,12 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,15 +23,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import com.example.mad_project.navigation.Screen
-import com.google.gson.Gson
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ViewModel.DetailScreenViewModel
 import com.example.ViewModel.FlightsViewModel
 import com.example.ViewModel.SightsViewModel
+import com.example.mad_project.navigation.Screen
+import com.google.gson.Gson
 
 val gson = Gson()
 
@@ -57,7 +38,8 @@ val gson = Gson()
 fun FeatureList(
     modifier: Modifier,
     navController: NavController,
-    viewModel: SightsViewModel
+    viewModel: SightsViewModel,
+    onFeatureClick: (Feature) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
         items(viewModel.features) { feature ->
@@ -65,7 +47,9 @@ fun FeatureList(
                 feature = feature,
                 onItemClick = { featureitem ->
                     navController.navigate(route = Screen.DetailScreen.withInfo(gson.toJson(featureitem)))
-                }
+                },
+                onFeatureClick = onFeatureClick,
+                isSelected = viewModel.selectedSights.contains(feature) // Added parameter
             )
         }
     }
@@ -75,7 +59,9 @@ fun FeatureList(
 fun FeatureRow(
     modifier: Modifier = Modifier,
     feature: Feature,
-    onItemClick: (Feature) -> Unit = {}
+    onItemClick: (Feature) -> Unit = {},
+    onFeatureClick: (Feature) -> Unit,
+    isSelected: Boolean // Added parameter
 ) {
     Card(
         modifier = Modifier
@@ -144,7 +130,7 @@ fun FeatureRow(
                         modifier = Modifier
                             .size(25.dp)
                             .clickable {
-                                onItemClickAroow(feature,context)
+                                onItemClickAroow(feature, context)
                             }
                     ) {
                         Icon(
@@ -155,6 +141,15 @@ fun FeatureRow(
                         )
                     }
                 }
+
+                // New clickable text to select/deselect sight
+                Text(
+                    text = if (isSelected) "Deselect" else "Select",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        onFeatureClick(feature)
+                    }
+                )
             }
         }
     }
@@ -163,7 +158,7 @@ fun FeatureRow(
 @Composable
 fun PlaceDetails(modifier: Modifier, viewModel: DetailScreenViewModel) {
     val feature = viewModel.feature.value ?: return
-    Column (modifier = modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = modifier.padding(horizontal = 20.dp)) {
         Text(text = "Name: ${feature.properties?.name ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
         Text(text = "Kind: ${feature.properties?.kinds?.replace("_", " ") ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
         Text(text = "Rate: ${feature.properties?.rate ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
@@ -180,7 +175,7 @@ fun openGoogleMaps(latitude: Double, longitude: Double, context: Context) {
     context.startActivity(intent)
 }
 
-fun onItemClickAroow(feature: Feature,context: android.content.Context) {
+fun onItemClickAroow(feature: Feature, context: android.content.Context) {
     val url = "https://www.wikidata.org/wiki/${feature.properties?.wikidata}"
     val intent = Intent(Intent.ACTION_VIEW).apply {
         data = Uri.parse(url)
@@ -190,7 +185,7 @@ fun onItemClickAroow(feature: Feature,context: android.content.Context) {
 
 @Composable
 fun HorizontalScrollableImageView(viewModel: DetailScreenViewModel, modifier: Modifier) {
-    Log.i("HorizontalScrollableImageView",viewModel.feature.value?.properties?.images.toString())
+    Log.i("HorizontalScrollableImageView", viewModel.feature.value?.properties?.images.toString())
     val c = viewModel.feature.value?.properties?.images?.count()
     LazyRow(modifier = modifier) {
         items(viewModel.feature.value?.properties?.images ?: listOf()) { image ->

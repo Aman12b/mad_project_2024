@@ -27,4 +27,10 @@ sealed class Screen(val route: String) {
             return this.route.replace("{$DETAIL_ARGUMENT_KEY}", newValue = detail)
         }
     }
+
+    object SummaryScreen : Screen(route = "summary/{summaryJson}") {
+        fun withJsonString(summaryJson: String): String {
+            return this.route.replace("{summaryJson}", newValue = summaryJson)
+        }
+    }
 }
