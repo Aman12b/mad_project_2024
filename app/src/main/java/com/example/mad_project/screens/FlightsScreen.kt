@@ -1,6 +1,11 @@
 package com.example.mad_project.screens
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.icu.text.SimpleDateFormat
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -22,8 +27,10 @@ import com.example.ViewModel.FlightsViewModel
 import com.example.mad_project.classes.FlightData
 import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import com.example.mad_project.navigation.Screen
+import com.example.mad_project.notification.AlarmReceiver
 import com.example.movieappmad24.components.Bars.TopAppBarAction
 import org.json.JSONObject
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -155,6 +162,7 @@ fun FlightsScreen(
                             }
                             val info = updatedJsonObject.toString()
                             navController.navigate(route = Screen.SightsScreen.withJsonString(info))
+                            scheduleNotification(navController.context, selectedFlight)
                         }
                     },
                     modifier = Modifier
@@ -188,4 +196,24 @@ fun FlightCard(flight: FlightData, isSelected: Boolean, onClick: () -> Unit) {
             Text(text = "Flight Number: ${flight.flight_number}")
         }
     }
+}
+
+fun scheduleNotification(context: Context, flight: FlightData) {
+    val intent = Intent(context, AlarmReceiver::class.java).apply {
+        putExtra("title", "Flight Reminder")
+        putExtra("message", "Your flight ${flight.flight_number} is coming up soon!")
+    }
+
+    val pendingIntent = PendingIntent.getBroadcast(
+        context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    // Konvertiere `departure_at` in Millisekunden
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+    val flightTimeInMillis = dateFormat.parse(flight.departure_at)?.time ?: return
+    val notificationTime = flightTimeInMillis - 1 * 60 * 60 * 1000 // 1 Stunde vor dem Flug
+
+    alarmManager.setExact(AlarmManager.RTC_WAKEUP, notificationTime, pendingIntent)
 }
