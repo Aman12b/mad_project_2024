@@ -49,7 +49,6 @@ fun DestinationSelectScreen(
         factory = DestinationSelectViewModelFactory(context)
     )
 
-    // Synchronize state variables with ViewModel state
     var startLocation by remember { mutableStateOf(viewModel.startLocation.value) }
     var selectedDestination by remember { mutableStateOf(viewModel.selectedDestination.value) }
     var date1 by remember { mutableStateOf(viewModel.date1.value) }
@@ -64,7 +63,8 @@ fun DestinationSelectScreen(
     val startDate = remember(date1) { if (date1.isNotEmpty()) LocalDate.parse(date1, formatter) else null }
     val endDate = remember(date2) { if (date2.isNotEmpty()) LocalDate.parse(date2, formatter) else null }
 
-    // Determine the correct start and end dates
+
+    // Swap dates if necessary
     val (finalStartDate, finalEndDate) = remember(startDate, endDate) {
         if (startDate != null && endDate != null) {
             if (startDate.isBefore(endDate)) {
@@ -121,15 +121,12 @@ fun DestinationSelectScreen(
 
         val jsonString = jsonObject.toString()
 
-        // Save to SharedPreferences with a fixed key
         val sharedPref = context.getSharedPreferences("my_shared_preferences", Context.MODE_PRIVATE)
-        val entryKey = System.currentTimeMillis().toString() // Use timestamp as key
+        val entryKey = System.currentTimeMillis().toString() // we use the timestamp as key
         with(sharedPref.edit()) {
             putString(entryKey, jsonString)
             apply()
         }
-
-        // Add the new entry to the list for display
         savedDataList.add(jsonString)
     }
 
@@ -140,17 +137,16 @@ fun DestinationSelectScreen(
             clear()
             apply()
         }
-
         savedDataList.clear()
     }
 
     fun readAllData() {
         val sharedPref = context.getSharedPreferences("my_shared_preferences", Context.MODE_PRIVATE)
-        val entriesMap = sharedPref.all // Get all entries from SharedPreferences
-        savedDataList.clear() // Clear existing list
+        val entriesMap = sharedPref.all
+        savedDataList.clear()
         entriesMap.values.forEach { value ->
             if (value is String) {
-                savedDataList.add(value) // Add each JSON string to the list
+                savedDataList.add(value)
             }
         }
     }
@@ -207,7 +203,7 @@ fun DestinationSelectScreen(
                                     viewModel.luggageCount.value = luggageCount
                                     showDialog = false
                                 })
-                        } // Display entry index
+                        }
                     }
                 },
                 confirmButton = {
@@ -355,6 +351,7 @@ fun DestinationSelectScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Geographic Search button
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Geographic Search")
                     Spacer(modifier = Modifier.width(10.dp))
@@ -432,6 +429,7 @@ fun DestinationSelectScreen(
                 }
             }
 
+            // Navigate to next screen
             if (isFormComplete) {
                 Button(
                     onClick = {

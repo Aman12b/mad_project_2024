@@ -1,4 +1,3 @@
-// SightsViewModel.kt
 package com.example.ViewModel
 
 import android.util.Log
@@ -19,7 +18,6 @@ class SightsViewModel : ViewModel() {
     var isSortedAscending = mutableStateOf(true)
         private set
 
-    // MutableState for selected sights
     val selectedSights = mutableStateListOf<Feature>()
 
     fun fetchSights(lat: Double, lng: Double) {
@@ -49,7 +47,6 @@ class SightsViewModel : ViewModel() {
         isSortedAscending.value = !isSortedAscending.value
     }
 
-    // Function to toggle selected sights
     fun toggleSightSelection(sight: Feature) {
         if (selectedSights.contains(sight)) {
             selectedSights.remove(sight)

@@ -55,8 +55,6 @@ fun SightsScreen(
 
     val isLoading by remember { viewModel.isLoading }
     val isSortedAscending by remember { viewModel.isSortedAscending }
-    val context = LocalContext.current
-    val activity = context as? Activity
 
     Scaffold(
         topBar = {
@@ -82,7 +80,7 @@ fun SightsScreen(
                     onFeatureClick = { feature -> viewModel.toggleSightSelection(feature) }
                 )
 
-                // Button to navigate to SummaryScreen
+                // navigate to SummaryScreen
                 Button(
                     onClick = {
                         val updatedJsonObject = JSONObject(locationJsonString).apply {
@@ -90,7 +88,6 @@ fun SightsScreen(
                                 viewModel.selectedSights.forEach { sight ->
                                     put(JSONObject().apply {
                                         put("name", sight.properties?.name)
-                                        // Add other sight details as needed
                                     })
                                 }
                             })

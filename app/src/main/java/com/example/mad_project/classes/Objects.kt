@@ -29,11 +29,3 @@ data class FeatureCollection(
     val type: String?,
     val features: List<Feature>
 )
-
-data class ApiResponse(
-    val items: List<Item>
-)
-
-data class Item(
-    val link: String
-)

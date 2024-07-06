@@ -18,7 +18,6 @@ class FlightsViewModel : ViewModel() {
     var directFlight = mutableStateOf(false)
     var filterAirlineList = mutableStateOf(mapOf<String, Boolean>())
 
-    // Add a loading state
     val isLoading = mutableStateOf(true)
     val isError = mutableStateOf("")
     val highlightedFlight = mutableStateOf<FlightData?>(null)
@@ -27,11 +26,9 @@ class FlightsViewModel : ViewModel() {
     fun fetchFlights(origin: String, destination: String, startDate: String, endDate: String) {
         isLoading.value = true
 
-        // Extract IATA code
         val originIata = extractIataCode(origin)
         val destinationIata = extractIataCode(destination)
 
-        // Reformat dates
         val formattedStartDate = reformatDate(startDate)
         val formattedEndDate = reformatDate(endDate)
 
@@ -53,7 +50,6 @@ class FlightsViewModel : ViewModel() {
                 val gson = Gson()
                 val apiResponse = gson.fromJson(jsonData, ApiResponse::class.java)
 
-                // Flattening the nested structure
                 flights.clear()
                 apiResponse.data.values.forEach { flightData ->
                     flights.add(flightData)

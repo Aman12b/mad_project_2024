@@ -151,23 +151,6 @@ class DestinationSelectViewModel(
         savedStateHandle["date2"] = date
     }
 
-    fun toggleDirectFlight() {
-        directFlight.value = !directFlight.value
-        savedStateHandle["directFlight"] = directFlight.value
-    }
-
-    fun increaseLuggageCount() {
-        luggageCount.value += 1
-        savedStateHandle["luggageCount"] = luggageCount.value
-    }
-
-    fun decreaseLuggageCount() {
-        if (luggageCount.value > 0) {
-            luggageCount.value -= 1
-            savedStateHandle["luggageCount"] = luggageCount.value
-        }
-    }
-
     fun getCoordinates(cityWithIata: String): Coordinates? {
         val cityName = cityWithIata.substringBefore(" (")
         for (countryCities in cities.values) {
@@ -178,19 +161,5 @@ class DestinationSelectViewModel(
             }
         }
         return null
-    }
-
-    fun saveSettings(filename: String, json: String) {
-        val file = File(context.filesDir, "$filename.json")
-        file.writeText(json)
-    }
-
-    fun loadSettings(filename: String): String? {
-        val file = File(context.filesDir, "$filename.json")
-        return if (file.exists()) file.readText() else null
-    }
-
-    fun getSavedSettingsFiles(): List<String> {
-        return context.filesDir.list()?.filter { it.endsWith(".json") }?.map { it.removeSuffix(".json") } ?: emptyList()
     }
 }

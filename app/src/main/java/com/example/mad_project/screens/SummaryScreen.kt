@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
+import com.example.movieappmad24.components.Bars.SimpleTopAppBar
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
@@ -43,7 +44,7 @@ fun SummaryScreen(
 
     Scaffold(
         topBar = {
-            // Optional: Add a top bar if needed
+            SimpleTopAppBar(title = "Summary", navController = navController)
         }
     ) { innerPadding ->
         Column(
@@ -80,12 +81,11 @@ fun SummaryScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Finish button to generate PDF and share it
             Button(
                 onClick = {
                     val pdfFile = generatePdf(context, summaryData)
                     sharePdf(context, pdfFile)
-                    activity?.finish() // Finish the current activity
+                    activity?.finish()
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)

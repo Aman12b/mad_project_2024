@@ -142,7 +142,7 @@ fun FeatureRow(
                     }
                 }
 
-                // New clickable text to select/deselect sight
+                // Select/Deselect sights
                 Text(
                     text = if (isSelected) "Deselect" else "Select",
                     color = Color.Blue,
@@ -205,21 +205,6 @@ fun HorizontalScrollableImageView(viewModel: DetailScreenViewModel, modifier: Mo
                     contentScale = ContentScale.Crop
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun FlightList(
-    modifier: Modifier = Modifier,
-    navController: NavController,
-    viewModel: FlightsViewModel
-) {
-    val flights = viewModel.flights
-    LazyColumn(modifier = modifier) {
-        items(flights.size) { index ->
-            val flight = flights[index]
-            Text(text = "${flight.airline} - ${flight.departure_at} - ${flight.price}")
         }
     }
 }

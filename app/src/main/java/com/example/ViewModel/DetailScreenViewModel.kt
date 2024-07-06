@@ -12,7 +12,6 @@ import androidx.compose.runtime.State
 import com.example.mad_project.common.getWikiInfo
 
 class DetailScreenViewModel : ViewModel() {
-    // Define your state here
     private val _feature = mutableStateOf<Feature?>(null)
     val feature: State<Feature?> = _feature
 

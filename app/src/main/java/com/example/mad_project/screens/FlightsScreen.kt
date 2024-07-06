@@ -126,7 +126,7 @@ fun FlightsScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = 56.dp) // Add padding to avoid overlap with the button
+                        .padding(bottom = 56.dp)
                 ) {
                     items(viewModel.flights) { flight ->
                         if (!flight.hidebyairlinefilter && !flight.hidebydirectfilter) {

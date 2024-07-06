@@ -97,12 +97,12 @@ suspend fun getWikiInfo(placeName: String, callback: (String) -> Unit) {
                 val extract = jsonObject.getString("extract")
                 callback(extract)
                 connection.disconnect()
-                return@withContext // Exit function after successful callback
+                return@withContext
             }
 
-            // Delay between requests to avoid spamming the API
+            // Delay between requests
             if (index < combinationsToTry.size - 1) {
-                delay(500) // Adjust the delay duration as needed (in milliseconds)
+                delay(500)
             }
 
             connection.disconnect()
@@ -124,29 +124,4 @@ fun generateCombinations(words: List<String>): List<String> {
         }
     }
     return combinations
-}
-
-//----- Flight API -----
-fun flightJson(url: String, processJson: (String) -> Unit) {
-    val request = Request.Builder()
-        .url(url)
-        .build()
-    Log.i("API FETCH", url)
-    val client = OkHttpClient()
-    client.newCall(request).enqueue(object : Callback {
-        override fun onFailure(call: Call, e: IOException) {
-            e.printStackTrace()
-            Log.i("API FETCH ERROR", e.stackTraceToString())
-        }
-
-        override fun onResponse(call: Call, response: Response) {
-            try {
-                val jsonData = response.body?.string()
-                processJson(jsonData ?: "")
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.i("Error fetching data", e.toString())
-            }
-        }
-    })
 }

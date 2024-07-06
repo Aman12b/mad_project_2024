@@ -1,7 +1,5 @@
 package com.example.mad_project.classes
 
-import androidx.compose.runtime.mutableStateListOf
-
 data class FlightData(
     val origin: String,
     val destination: String,
